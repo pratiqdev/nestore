@@ -6,19 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nestore Static</title>
 </head>
-<script src="../dist/nestore.umd.js"></script>
+<script src="../../dist/nestore.umd.js"></script>
 <body>
     <h2>Nestore Static HTML test</h2>
     <p>Hello, {{hello}}</p>
 </body>
     <script defer>
-        const nestore = window.nestore
+
+        console.log(window.nestore)
+
+        class Nestore {
+            #privateProp
+            constructor(store = {}){
+                this.store = store
+                this.#privateProp = 'ayo'
+            }
+        }
+
+        console.log(Nestore)
+        // const nestore = window.nestore
         
         // console.log('window:', window)
         
-        const NST = nestore({
-            hello: 'World!'
-        })
+        // const NST = nestore({
+        //     hello: 'World!'
+        // })
         // const connect = (selector, path) => {
             
         // }

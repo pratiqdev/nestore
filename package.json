@@ -4,27 +4,31 @@
   "description": "",
   "type": "module",
   "module": "dist/nestore.js",
-  "main": "dist/nestore.cjs.js",
   "browser": "dist/nestore.umd.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "clear && rollup -c rollup.config.js"
+    "test:node": "clear && node _tests/node/node.js",
+    "test:unit": "clear && mocha --config .mocharc.cjs \"_tests/unit/*.js\"",
+    "build": "clear && rm -rf dist && rollup -c rollup.config.js"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.20.2",
+    "@babel/preset-env": "^7.20.2",
+    "@rollup/plugin-babel": "^6.0.2",
     "@rollup/plugin-commonjs": "^23.0.2",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^8.5.0",
+    "@types/chai": "^4.3.4",
     "@types/debug": "^4.1.7",
     "@types/node": "^18.11.3",
     "@types/react": "^18.0.21",
     "@types/spellchecker": "^3.5.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.40.1",
-    "chai": "^4.3.6",
-    "debug": "^4.3.4",
+    "acorn-stage3": "^4.0.0",
+    "chai": "^4.3.7",
     "dotenv": "^16.0.3",
     "eslint": "^8.25.0",
     "eslint-config-airbnb": "^19.0.4",
@@ -34,17 +38,23 @@
     "eslint-plugin-promise": "^6.1.0",
     "eslint-plugin-react": "^7.31.10",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "jasmine-core": "^4.5.0",
     "mocha": "^10.1.0",
     "nodemon": "^2.0.18",
     "rollup": "^2.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-terser": "^7.0.2",
+    "snowpack-plugin-acorn-injection": "^0.1.0",
     "ts-node": "^7.0.1",
     "tslib": "^2.4.1",
     "typescript": "^3.2.2"
   },
   "files": [
     "dist"
-  ]
+  ],
+  "browserslist": "> 0.25%, not dead",
+  "dependencies": {
+    "debug": "^4.3.4"
+  }
 }

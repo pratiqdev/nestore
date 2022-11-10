@@ -3,6 +3,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve'
 // import commonjs from '@rollup/plugin-commonjs'
 import typescript from '@rollup/plugin-typescript'
 // import { terser } from 'rollup-plugin-terser'
+import { babel } from '@rollup/plugin-babel'
 import nodeGlobals from 'rollup-plugin-node-globals'
 import nodeBuiltIns from 'rollup-plugin-node-builtins'
 import pkg from './package.json'
@@ -25,8 +26,19 @@ export default [
       nodeResolve({
         browser: true
       }), // so Rollup can find `ms`
-
-      typescript({ tsconfig: 'tsconfig.umd.json' })
+      typescript({ tsconfig: 'tsconfig.umd.json' }),
+      babel({
+        babelHelpers: 'inline',
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              useBuiltIns: 'entry',
+              corejs: '3.22'
+            }
+          ]
+        ]
+      })
     ]
   },
 
@@ -44,10 +56,22 @@ export default [
       nodeGlobals(), // required for some shims
       nodeBuiltIns(),
       nodeResolve(),
-      typescript({ tsconfig: 'tsconfig.json' }) // so Rollup can convert TypeScript to JavaScript
+      typescript({ tsconfig: 'tsconfig.json' }), // so Rollup can convert TypeScript to JavaScript
+      babel({
+        babelHelpers: 'inline',
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              useBuiltIns: 'entry',
+              corejs: '3.22'
+            }
+          ]
+        ]
+      })
     ],
     output: [
-      { file: pkg.main, format: 'cjs', exports: 'default' },
+      // { file: pkg.main, format: 'cjs', exports: 'default' },
       { file: pkg.module, format: 'esm' } // handle the es module build with tsc
     ]
   }

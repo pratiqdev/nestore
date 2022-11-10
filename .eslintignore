@@ -1,7 +1,7 @@
 dist
 node_modules
-_tests/
-_notes
+_tests/*
+_notes/*
 
 .eslint*
 .gitignore
