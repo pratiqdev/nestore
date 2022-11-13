@@ -1,70 +1,10 @@
 /* eslint-disable */
 import debug from 'debug'
+import { GetFieldType } from './types';
+import { GET, SET } from './lodashUtils.js'
 
 const LOG = (name:string) => debug(`nestore:${name}`)
 
-function nestore () {
-  const listeners = new Map()
-  const listenerCount = 0
-  const maxListeners = 10
-  const store = {}
-  const delimiter = '.'
-
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  UTILS
-
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  STORE
-
-  const get = (path:string) => { /* */ }
-  const set = (path:string, value?:unknown) => { /* */ }
-  const reset = (path:string) => { /* */ }
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  EVENTS
-  /**
- * Map paths to events Map
- * 'person.*' => [
- *      '-uuid' => () => {},
- *      '5/7-uuid' => () => {},
- *      '6/6-uuid' => () => {}, // will be removed
- * ]
- */
-
-  const addListener = (path:string, cb:() => unknown, max = -1) => {
-    // add
-    const temp = listeners.get(path) ?? []
-    temp.push({
-      count: 0,
-      max,
-      cb
-    })
-    listeners.set(path, temp)
-  }
-
-  const removeListener = () => { /* */ }
-
-  const emit = () => { /* */ }
-
-  const onAnyEvent = () => { /* */ }
-  const removeAllListeners = () => { /* */ }
-
-  // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  RETURN
-  return {
-    get,
-    set,
-    reset,
-    addListener,
-    removeListener,
-    on: addListener,
-    onAny: onAnyEvent,
-    off: removeListener,
-    offAll: removeAllListeners,
-    once: (path:string, cb: () => unknown) => addListener(path, cb, 1),
-    emit,
-    maxListeners,
-    listenerCount,
-    store,
-    delimiter
-  }
-}
 
 type NestoreEmit = {
   path:string;
@@ -130,98 +70,163 @@ class Nestore <T> {
     this.#settings = Object.assign(nestoreDefaultSettings, options)
   }
 
-  recurse (config: RecurseConfig) {
-    const log = LOG('recurse')
-    const ref = null
+  // recurse (config: RecurseConfig) {
+  //   const log = LOG('recurse')
+  //   const ref = null
 
-    const EMIT = this.emit
-    const rec = this.recurse
-    const og = this.#originalStore
-    const sto = this.#store
+  //   const EMIT = this.emit
+  //   const rec = this.recurse
+  //   const og = this.#originalStore
+  //   const sto = this.#store
 
-    function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], localConfig: RecurseConfig) {
-      // eslint-disable-next-line
-      Object.keys(obj as Record<string, unknown>).forEach((k) => {
+  //   function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], localConfig: RecurseConfig) {
+  //     // eslint-disable-next-line
+  //     Object.keys(obj as Record<string, unknown>).forEach((k) => {
 
-        if (typeof obj[k] === 'object' && obj[k] !== null) {
-          log('Recursing in:', k)
-          localConfig.foundPath += localConfig?.foundPath?.length ? `.${k}` : k
-          RECURSE(obj[k], localConfig)
-        }
-        // some comment
-        else {
-          log('Found val at:', k)
+  //       if (typeof obj[k] === 'object' && obj[k] !== null) {
+  //         log('Recursing in:', k)
+  //         localConfig.foundPath += localConfig?.foundPath?.length ? `.${k}` : k
+  //         RECURSE(obj[k], localConfig)
+  //       }
+  //       // some comment
+  //       else {
+  //         log('Found val at:', k)
 
-          localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
-          localConfig.foundKey = k
-          localConfig.foundVal = obj[k]
+  //         localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
+  //         localConfig.foundKey = k
+  //         localConfig.foundVal = obj[k]
 
-          switch (localConfig.action) {
-            case RecurseActions.SET: {
-              const emitObj = {
-                path: localConfig.foundPath ?? '',
-                key: k,
-                value: config.value
-              }
-              // eslint-disable-next-line
-              obj[k] = config.value
-              EMIT(emitObj)
-            } break
+  //         switch (localConfig.action) {
+  //           case RecurseActions.SET: {
+  //             const emitObj = {
+  //               path: localConfig.foundPath ?? '',
+  //               key: k,
+  //               value: config.value
+  //             }
+  //             // eslint-disable-next-line
+  //             obj[k] = config.value
+  //             EMIT(emitObj)
+  //           } break
 
-            case RecurseActions.RESET: {
-              const originalValue = rec({ action: 'get', path: localConfig.foundPath ?? '' })
-              rec({ action: 'set', value: originalValue, path: localConfig.foundPath ?? '' })
-            } break
+  //           case RecurseActions.RESET: {
+  //             const originalValue = rec({ action: 'get', path: localConfig.foundPath ?? '' })
+  //             rec({ action: 'set', value: originalValue, path: localConfig.foundPath ?? '' })
+  //           } break
 
-            default: return obj[k]
-          }
-        }
-      })
-    }
+  //           default: return obj[k]
+  //         }
+  //       }
+  //     })
+  //   }
 
-    RECURSE(this.#store, {
-      ...config,
-      foundPath: '',
-      foundKey: '',
-      foundVal: undefined
-    })
+  //   RECURSE(this.#store, {
+  //     ...config,
+  //     foundPath: '',
+  //     foundKey: '',
+  //     foundVal: undefined
+  //   })
 
-  }
+  // }
   
-  getValueFromPath (path:string, obj:unknown = this.#store) {
-    const log = LOG('getValueFromPath')
+  // getValueFromPath (path:string, obj:unknown = this.#store) {
+  //   const log = LOG('getValueFromPath')
+  //   let foundPath = ''
 
-    function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], localConfig: RecurseConfig) {
-      // eslint-disable-next-line
-      Object.keys(obj as Record<string, unknown>).forEach((k) => {
+  //   function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], path?: string) {
+  //     // eslint-disable-next-line
+  //     Object.keys(obj as Record<string, unknown>).forEach((k) => {
 
-        if (typeof obj[k] === 'object' && obj[k] !== null) {
-          log('Recursing in:', k)
-          localConfig.foundPath += localConfig?.foundPath?.length ? `.${k}` : k
-          RECURSE(obj[k], localConfig)
-        }
-        // some comment
-        else {
-          log('Found val at:', k)
+  //       if (typeof obj[k] === 'object' && obj[k] !== null) {
+  //         log('Recursing in:', k)
+  //         foundPath += foundPath.length ? `.${k}` : k
+  //         RECURSE(obj[k], path)
+  //       }
+  //       // some comment
+  //       else {
+  //         log('Found val at:', k)
 
-          localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
-          localConfig.foundKey = k
-          localConfig.foundVal = obj[k]
+  //         localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
+  //         localConfig.foundKey = k
+  //         localConfig.foundVal = obj[k]
 
         
-        }
-      })
-    }
+  //       }
+  //     })
+  //   }
 
-    RECURSE(obj, path)
+  //   RECURSE(obj, path)
 
+  // }
+
+  // // &                                                                                             _
+  // setValue(
+  //   path:string,
+  //   value?: unknown
+  // ){
+  //   const log = LOG('set')
+
+  //   function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], localConfig: RecurseConfig) {
+  //     // eslint-disable-next-line
+  //     Object.keys(obj as Record<string, unknown>).forEach((k) => {
+
+  //       if (typeof obj[k] === 'object' && obj[k] !== null) {
+  //         log('Recursing in:', k)
+  //         localConfig.foundPath += localConfig?.foundPath?.length ? `.${k}` : k
+  //         RECURSE(obj[k], localConfig)
+  //       }
+  //       // some comment
+  //       else {
+  //         log('Found val at:', k)
+
+  //         localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
+  //         localConfig.foundKey = k
+  //         localConfig.foundVal = obj[k]
+
+        
+  //       }
+  //     })
+  //   }
+  // }
+
+
+  // // &                                                                                             _
+  // getValue<
+  //   TPath extends string,
+  //   TDefault = GetFieldType<T, TPath>
+  // >(
+  //   path: TPath,
+  //   defaultValue?: TDefault
+  // ): GetFieldType<T, TPath> | TDefault {
+  //   let data = this.#store
+  //   const value = path
+  //     .split(/[.[\]]/)
+  //     .filter(Boolean)
+  //     .reduce<GetFieldType<T, TPath>>(
+  //       (value, key) => (value as any)?.[key],
+  //       data as any
+  //     );
+
+  //   return value !== undefined ? value : (defaultValue as TDefault);
+  // }
+
+  
+
+
+  // &                                                                                             _
+  get (path:string) { 
+    return GET(this.#store, path)
   }
 
   // &                                                                                             _
-  get (path:string) { return this }
-
-  // &                                                                                             _
-  set (path:string, value?:unknown) { return this }
+  set (path:string, value?:unknown) { 
+    return SET(this.#store, path, value)
+    //+ emit a value for this path, or any path that starts with path:
+    //+ set("person.address.apt")
+    //+ on("person.address.*", () => { })
+    //- have to find a way to match wildcards with regexp
+    //- like "person.*" => "person.name", "person.age"
+    //- or "list.*.key" => "list.0.key", "list.1.key", "list.2.key"
+  }
 
   // &                                                                                             _
   reset (path:string) { return this }

@@ -5,6 +5,7 @@
   "type": "module",
   "module": "dist/nestore.js",
   "browser": "dist/nestore.umd.js",
+  "types": "dist/src/main.d.ts",
   "scripts": {
     "test:node": "clear && node _tests/node/node.js",
     "test:unit": "clear && mocha --config .mocharc.cjs \"_tests/unit/*.js\"",
@@ -48,7 +49,7 @@
     "snowpack-plugin-acorn-injection": "^0.1.0",
     "ts-node": "^7.0.1",
     "tslib": "^2.4.1",
-    "typescript": "^3.2.2"
+    "typescript": "^4.8.4"
   },
   "files": [
     "dist"
