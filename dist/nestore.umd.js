@@ -1,12 +1,12 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('debug')) :
     typeof define === 'function' && define.amd ? define(['debug'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.nestore = factory(global.debug));
-})(this, (function (debug) { 'use strict';
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.nestore = factory(global.createDebug));
+})(this, (function (createDebug) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-    var debug__default = /*#__PURE__*/_interopDefaultLegacy(debug);
+    var createDebug__default = /*#__PURE__*/_interopDefaultLegacy(createDebug);
 
     function __classPrivateFieldGet(receiver, state, kind, f) {
       if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
@@ -20,103 +20,100 @@
       return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
     }
 
-    function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
     /* eslint-disable */
-
-    var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
-    var reIsPlainProp = /^\w*$/;
+    //@ts-nocheck
+    const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
+    const reIsPlainProp = /^\w*$/;
     function isKey(value, object) {
-      if (Array.isArray(value)) {
-        return false;
-      }
-      var type = _typeof(value);
-      if (type === 'number' || type === 'boolean' || value == null || isSymbol(value)) {
-        return true;
-      }
-      return reIsPlainProp.test(value) || !reIsDeepProp.test(value) || object != null && value in Object(object);
+        if (Array.isArray(value)) {
+            return false;
+        }
+        const type = typeof value;
+        if (type === 'number' || type === 'boolean' || value == null || isSymbol(value)) {
+            return true;
+        }
+        return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+            (object != null && value in Object(object));
     }
     function memoize(func, resolver) {
-      if (typeof func !== 'function' || resolver != null && typeof resolver !== 'function') {
-        throw new TypeError('Expected a function');
-      }
-      var memoized = function memoized() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
+        if (typeof func !== 'function' || (resolver != null && typeof resolver !== 'function')) {
+            throw new TypeError('Expected a function');
         }
-        var key = resolver ? resolver.apply(this, args) : args[0];
-        var cache = memoized.cache;
-        if (cache.has(key)) {
-          return cache.get(key);
-        }
-        var result = func.apply(this, args);
-        memoized.cache = cache.set(key, result) || cache;
-        return result;
-      };
-      memoized.cache = new (memoize.Cache || Map)();
-      return memoized;
+        const memoized = function (...args) {
+            const key = resolver ? resolver.apply(this, args) : args[0];
+            const cache = memoized.cache;
+            if (cache.has(key)) {
+                return cache.get(key);
+            }
+            const result = func.apply(this, args);
+            memoized.cache = cache.set(key, result) || cache;
+            return result;
+        };
+        memoized.cache = new (memoize.Cache || Map);
+        return memoized;
     }
     memoize.Cache = Map;
-    var MAX_MEMOIZE_SIZE = 500;
+    const MAX_MEMOIZE_SIZE = 500;
     function memoizeCapped(func) {
-      var result = memoize(func, function (key) {
-        var cache = result.cache;
-        if (cache.size === MAX_MEMOIZE_SIZE) {
-          cache.clear();
-        }
-        return key;
-      });
-      return result;
+        const result = memoize(func, (key) => {
+            const { cache } = result;
+            if (cache.size === MAX_MEMOIZE_SIZE) {
+                cache.clear();
+            }
+            return key;
+        });
+        return result;
     }
-    var charCodeOfDot = '.'.charCodeAt(0);
-    var reEscapeChar = /\\(\\)?/g;
-    var rePropName = RegExp(
+    const charCodeOfDot = '.'.charCodeAt(0);
+    const reEscapeChar = /\\(\\)?/g;
+    const rePropName = RegExp(
     // Match anything that isn't a dot or bracket.
     '[^.[\\]]+' + '|' +
-    // Or match property names within brackets.
-    '\\[(?:' +
-    // Match a non-string expression.
-    '([^"\'][^[]*)' + '|' +
-    // Or match strings (supports escaping characters).
-    '(["\'])((?:(?!\\2)[^\\\\]|\\\\.)*?)\\2' + ')\\]' + '|' +
-    // Or match "" as the space between consecutive dots or empty brackets.
-    '(?=(?:\\.|\\[\\])(?:\\.|\\[\\]|$))', 'g');
-    var stringToPath = memoizeCapped(function (string) {
-      var result = [];
-      if (string.charCodeAt(0) === charCodeOfDot) {
-        result.push('');
-      }
-      string.replace(rePropName, function (match, expression, quote, subString) {
-        var key = match;
-        if (quote) {
-          key = subString.replace(reEscapeChar, '$1');
-        } else if (expression) {
-          key = expression.trim();
+        // Or match property names within brackets.
+        '\\[(?:' +
+        // Match a non-string expression.
+        '([^"\'][^[]*)' + '|' +
+        // Or match strings (supports escaping characters).
+        '(["\'])((?:(?!\\2)[^\\\\]|\\\\.)*?)\\2' +
+        ')\\]' + '|' +
+        // Or match "" as the space between consecutive dots or empty brackets.
+        '(?=(?:\\.|\\[\\])(?:\\.|\\[\\]|$))', 'g');
+    const stringToPath = memoizeCapped((string) => {
+        const result = [];
+        if (string.charCodeAt(0) === charCodeOfDot) {
+            result.push('');
         }
-        result.push(key);
-      });
-      return result;
+        string.replace(rePropName, (match, expression, quote, subString) => {
+            let key = match;
+            if (quote) {
+                key = subString.replace(reEscapeChar, '$1');
+            }
+            else if (expression) {
+                key = expression.trim();
+            }
+            result.push(key);
+        });
+        return result;
     });
     function castPath(value, object) {
-      if (Array.isArray(value)) {
-        return value;
-      }
-      return isKey(value, object) ? [value] : stringToPath(value);
+        if (Array.isArray(value)) {
+            return value;
+        }
+        return isKey(value, object) ? [value] : stringToPath(value);
     }
-    var toStr = Object.prototype.toString;
+    const toStr = Object.prototype.toString;
     function getTag(value) {
-      if (value == null) {
-        return value === undefined ? '[object Undefined]' : '[object Null]';
-      }
-      return toStr.call(value);
+        if (value == null) {
+            return value === undefined ? '[object Undefined]' : '[object Null]';
+        }
+        return toStr.call(value);
     }
     function isSymbol(value) {
-      var type = _typeof(value);
-      return type == 'symbol' || type === 'object' && value != null && getTag(value) == '[object Symbol]';
+        const type = typeof value;
+        return type == 'symbol' || (type === 'object' && value != null && getTag(value) == '[object Symbol]');
     }
-
     /** Used as references for various `Number` constants. */
-    var INFINITY = 1 / 0;
-
+    const INFINITY = 1 / 0;
     /**
      * Converts `value` to a string key if it's not a string or symbol.
      *
@@ -125,250 +122,221 @@
      * @returns {string|symbol} Returns the key.
      */
     function toKey(value) {
-      if (typeof value === 'string' || isSymbol(value)) {
-        return value;
-      }
-      var result = "".concat(value);
-      return result == '0' && 1 / value == -INFINITY ? '-0' : result;
+        if (typeof value === 'string' || isSymbol(value)) {
+            return value;
+        }
+        const result = `${value}`;
+        return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
     }
     function baseGet(object, path) {
-      path = castPath(path, object);
-      var index = 0;
-      var _path = path,
-        length = _path.length;
-      while (object != null && index < length) {
-        object = object[toKey(path[index++])];
-      }
-      return index && index == length ? object : undefined;
+        path = castPath(path, object);
+        let index = 0;
+        const { length } = path;
+        while (object != null && index < length) {
+            object = object[toKey(path[index++])];
+        }
+        return (index && index == length) ? object : undefined;
     }
     function GET(object, path, defaultValue) {
-      var result = object == null ? undefined : baseGet(object, path);
-      return result === undefined ? defaultValue : result;
+        const result = object == null ? undefined : baseGet(object, path);
+        return result === undefined ? defaultValue : result;
     }
-
     //~                                                                                   
     //~                                                                                   
     //~                                                                                   
-
     function baseAssignValue(object, key, value) {
-      if (key == '__proto__') {
-        Object.defineProperty(object, key, {
-          'configurable': true,
-          'enumerable': true,
-          'value': value,
-          'writable': true
-        });
-      } else {
-        object[key] = value;
-      }
+        if (key == '__proto__') {
+            Object.defineProperty(object, key, {
+                'configurable': true,
+                'enumerable': true,
+                'value': value,
+                'writable': true
+            });
+        }
+        else {
+            object[key] = value;
+        }
     }
     function isObject(value) {
-      var type = _typeof(value);
-      return value != null && (type === 'object' || type === 'function');
+        const type = typeof value;
+        return value != null && (type === 'object' || type === 'function');
     }
-
     /** Used as references for various `Number` constants. */
-    var MAX_SAFE_INTEGER = 9007199254740991;
-
+    const MAX_SAFE_INTEGER = 9007199254740991;
     /** Used to detect unsigned integer values. */
-    var reIsUint = /^(?:0|[1-9]\d*)$/;
+    const reIsUint = /^(?:0|[1-9]\d*)$/;
     function isIndex(value, length) {
-      var type = _typeof(value);
-      length = length == null ? MAX_SAFE_INTEGER : length;
-      return !!length && (type === 'number' || type !== 'symbol' && reIsUint.test(value)) && value > -1 && value % 1 == 0 && value < length;
+        const type = typeof value;
+        length = length == null ? MAX_SAFE_INTEGER : length;
+        return !!length &&
+            (type === 'number' ||
+                (type !== 'symbol' && reIsUint.test(value))) &&
+            (value > -1 && value % 1 == 0 && value < length);
     }
     function eq(value, other) {
-      return value === other || value !== value && other !== other;
+        return value === other || (value !== value && other !== other);
     }
     function assignValue(object, key, value) {
-      var objValue = object[key];
-      if (!(Object.prototype.hasOwnProperty.call(object, key) && eq(objValue, value))) {
-        if (value !== 0 || 1 / value === 1 / objValue) {
-          baseAssignValue(object, key, value);
+        const objValue = object[key];
+        if (!(Object.prototype.hasOwnProperty.call(object, key) && eq(objValue, value))) {
+            if (value !== 0 || (1 / value) === (1 / objValue)) {
+                baseAssignValue(object, key, value);
+            }
         }
-      } else if (value === undefined && !(key in object)) {
-        baseAssignValue(object, key, value);
-      }
+        else if (value === undefined && !(key in object)) {
+            baseAssignValue(object, key, value);
+        }
     }
     function baseSet(object, path, value, customizer) {
-      if (!isObject(object)) {
-        return object;
-      }
-      path = castPath(path, object);
-      var length = path.length;
-      var lastIndex = length - 1;
-      var index = -1;
-      var nested = object;
-      while (nested != null && ++index < length) {
-        var key = toKey(path[index]);
-        var newValue = value;
-        if (index != lastIndex) {
-          var objValue = nested[key];
-          newValue = customizer ? customizer(objValue, key, nested) : undefined;
-          if (newValue === undefined) {
-            newValue = isObject(objValue) ? objValue : isIndex(path[index + 1]) ? [] : {};
-          }
+        if (!isObject(object)) {
+            return object;
         }
-        assignValue(nested, key, newValue);
-        nested = nested[key];
-      }
-      return object;
+        path = castPath(path, object);
+        const length = path.length;
+        const lastIndex = length - 1;
+        let index = -1;
+        let nested = object;
+        while (nested != null && ++index < length) {
+            const key = toKey(path[index]);
+            let newValue = value;
+            if (index != lastIndex) {
+                const objValue = nested[key];
+                newValue = customizer ? customizer(objValue, key, nested) : undefined;
+                if (newValue === undefined) {
+                    newValue = isObject(objValue)
+                        ? objValue
+                        : (isIndex(path[index + 1]) ? [] : {});
+                }
+            }
+            assignValue(nested, key, newValue);
+            nested = nested[key];
+        }
+        return object;
     }
     function SET(object, path, value) {
-      return object == null ? object : baseSet(object, path, value);
+        return object == null ? object : baseSet(object, path, value);
     }
 
+    const debug = (name) => createDebug__default["default"](`NST:${name}`);
+    const colors = {
+        reset: '\x1b[0m',
+        bright: '\x1b[1m',
+        dim: '\x1b[2m',
+        underscore: '\x1b[4m',
+        red: '\x1b[31m',
+        green: '\x1b[32m',
+        yellow: '\x1b[33m',
+        blue: '\x1b[34m',
+        magenta: '\x1b[35m',
+        cyan: '\x1b[36m',
+        white: '\x1b[37m',
+        grey: '\x1b[2m',
+        RED: '\x1b[31m\x1b[1m',
+        GREEN: '\x1b[32m\x1b[1m',
+        YELLOW: '\x1b[33m\x1b[1m',
+        BLUE: '\x1b[34m\x1b[1m',
+        MAGENTA: '\x1b[35m\x1b[1m',
+        CYAN: '\x1b[36m\x1b[1m',
+        WHITE: '\x1b[37m\x1b[1m',
+        GREY: '\x1b[2m\x1b[1m'
+    };
+
     var _Nestore_listeners, _Nestore_anyListeners, _Nestore_store, _Nestore_originalStore, _Nestore_settings;
-    const LOG = (name) => debug__default["default"](`nestore:${name}`);
+    const linerule = () => `-`.repeat(process.stdout.columns - 20);
+    // //Explanation code
+    // function matchRuleExpl(str, rule) {
+    //   // for this solution to work on any string, no matter what characters it has
+    //   var escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    //   // "."  => Find a single character, except newline or line terminator
+    //   // ".*" => Matches any string that contains zero or more characters
+    //   rule = rule.split("*").map(escapeRegex).join(".*");
+    //   // "^"  => Matches any string with the following at the beginning of it
+    //   // "$"  => Matches any string with that in front at the end of it
+    //   rule = "^" + rule + "$"
+    //   //Create a regular expression object for matching string
+    //   var regex = new RegExp(rule);
+    //   //Returns true if it finds a match, otherwise it returns false
+    //   return regex.test(str);
+    // }
     // ~                                                                                               _
     const nestoreDefaultSettings = {
-        delimiter: '.',
-        maxListeners: -1
+        delimiter: ".",
+        maxListeners: -1,
     };
     // ~                                                                                               _
     // ~                                                                                               _
     class Nestore {
-        constructor(initialStore = {}, options = {}) {
+        constructor(initialStore = {}, options = nestoreDefaultSettings) {
             _Nestore_listeners.set(this, void 0);
             _Nestore_anyListeners.set(this, void 0);
             _Nestore_store.set(this, void 0);
             _Nestore_originalStore.set(this, void 0);
             _Nestore_settings.set(this, void 0);
-            const log = LOG('init');
-            log('Store:', initialStore);
-            log('Options:', options);
+            const log = debug("init");
+            log("Store:", initialStore);
+            log("Options:", options);
             __classPrivateFieldSet(this, _Nestore_store, Object.assign({}, initialStore), "f");
             __classPrivateFieldSet(this, _Nestore_originalStore, Object.assign({}, initialStore), "f");
             __classPrivateFieldSet(this, _Nestore_listeners, new Map(), "f");
             __classPrivateFieldSet(this, _Nestore_anyListeners, [], "f");
             __classPrivateFieldSet(this, _Nestore_settings, Object.assign(nestoreDefaultSettings, options), "f");
         }
-        // recurse (config: RecurseConfig) {
-        //   const log = LOG('recurse')
-        //   const ref = null
-        //   const EMIT = this.emit
-        //   const rec = this.recurse
-        //   const og = this.#originalStore
-        //   const sto = this.#store
-        //   function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], localConfig: RecurseConfig) {
-        //     // eslint-disable-next-line
-        //     Object.keys(obj as Record<string, unknown>).forEach((k) => {
-        //       if (typeof obj[k] === 'object' && obj[k] !== null) {
-        //         log('Recursing in:', k)
-        //         localConfig.foundPath += localConfig?.foundPath?.length ? `.${k}` : k
-        //         RECURSE(obj[k], localConfig)
-        //       }
-        //       // some comment
-        //       else {
-        //         log('Found val at:', k)
-        //         localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
-        //         localConfig.foundKey = k
-        //         localConfig.foundVal = obj[k]
-        //         switch (localConfig.action) {
-        //           case RecurseActions.SET: {
-        //             const emitObj = {
-        //               path: localConfig.foundPath ?? '',
-        //               key: k,
-        //               value: config.value
-        //             }
-        //             // eslint-disable-next-line
-        //             obj[k] = config.value
-        //             EMIT(emitObj)
-        //           } break
-        //           case RecurseActions.RESET: {
-        //             const originalValue = rec({ action: 'get', path: localConfig.foundPath ?? '' })
-        //             rec({ action: 'set', value: originalValue, path: localConfig.foundPath ?? '' })
-        //           } break
-        //           default: return obj[k]
-        //         }
-        //       }
-        //     })
-        //   }
-        //   RECURSE(this.#store, {
-        //     ...config,
-        //     foundPath: '',
-        //     foundKey: '',
-        //     foundVal: undefined
-        //   })
-        // }
-        // getValueFromPath (path:string, obj:unknown = this.#store) {
-        //   const log = LOG('getValueFromPath')
-        //   let foundPath = ''
-        //   function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], path?: string) {
-        //     // eslint-disable-next-line
-        //     Object.keys(obj as Record<string, unknown>).forEach((k) => {
-        //       if (typeof obj[k] === 'object' && obj[k] !== null) {
-        //         log('Recursing in:', k)
-        //         foundPath += foundPath.length ? `.${k}` : k
-        //         RECURSE(obj[k], path)
-        //       }
-        //       // some comment
-        //       else {
-        //         log('Found val at:', k)
-        //         localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
-        //         localConfig.foundKey = k
-        //         localConfig.foundVal = obj[k]
-        //       }
-        //     })
-        //   }
-        //   RECURSE(obj, path)
-        // }
-        // // &                                                                                             _
-        // setValue(
-        //   path:string,
-        //   value?: unknown
-        // ){
-        //   const log = LOG('set')
-        //   function RECURSE (obj:Partial<T> | T[Extract<keyof T, string>], localConfig: RecurseConfig) {
-        //     // eslint-disable-next-line
-        //     Object.keys(obj as Record<string, unknown>).forEach((k) => {
-        //       if (typeof obj[k] === 'object' && obj[k] !== null) {
-        //         log('Recursing in:', k)
-        //         localConfig.foundPath += localConfig?.foundPath?.length ? `.${k}` : k
-        //         RECURSE(obj[k], localConfig)
-        //       }
-        //       // some comment
-        //       else {
-        //         log('Found val at:', k)
-        //         localConfig.foundPath += localConfig.foundPath?.length ? `.${k}` : k
-        //         localConfig.foundKey = k
-        //         localConfig.foundVal = obj[k]
-        //       }
-        //     })
-        //   }
-        // }
-        // // &                                                                                             _
-        // getValue<
-        //   TPath extends string,
-        //   TDefault = GetFieldType<T, TPath>
-        // >(
-        //   path: TPath,
-        //   defaultValue?: TDefault
-        // ): GetFieldType<T, TPath> | TDefault {
-        //   let data = this.#store
-        //   const value = path
-        //     .split(/[.[\]]/)
-        //     .filter(Boolean)
-        //     .reduce<GetFieldType<T, TPath>>(
-        //       (value, key) => (value as any)?.[key],
-        //       data as any
-        //     );
-        //   return value !== undefined ? value : (defaultValue as TDefault);
-        // }
         // &                                                                                             _
         get(path) {
             return GET(__classPrivateFieldGet(this, _Nestore_store, "f"), path);
         }
         // &                                                                                             _
         set(path, value) {
+            var _a;
+            this.emit({
+                path,
+                key: (_a = path.split(__classPrivateFieldGet(this, _Nestore_settings, "f").delimiter).pop()) !== null && _a !== void 0 ? _a : "/",
+                value,
+            });
             return SET(__classPrivateFieldGet(this, _Nestore_store, "f"), path, value);
+            //+ emit a value for this path, or any path that starts with path:
+            //+ set("person.address.apt")
+            //+ on("person.address.*", () => { })
+            //- have to find a way to match wildcards with regexp
+            //- like "person.*" => "person.name", "person.age"
+            //- or "list.*.key" => "list.0.key", "list.1.key", "list.2.key"
         }
         // &                                                                                             _
-        reset(path) { return this; }
+        reset(path) {
+            return this;
+        }
         // &                                                                                             _
-        addListener(path, listener, max = -1) { return this; }
+        addListener(path, listener, max = -1) {
+            const log = debug("addListener");
+            // check the listeners map to see if this path exists
+            // if it already exists: push this listener to the array
+            if (__classPrivateFieldGet(this, _Nestore_listeners, "f").has(path)) {
+                log(`Path exists in listener map > pushing listener object`);
+                let og = __classPrivateFieldGet(this, _Nestore_listeners, "f").get(path);
+                og.push({
+                    cb: listener,
+                    count: 0,
+                    max,
+                });
+            }
+            // if listeners map has no path, set as array of [listener]
+            else {
+                log(`Path does not exist in listener map > creating new path entry`);
+                __classPrivateFieldGet(this, _Nestore_listeners, "f").set(path, [
+                    {
+                        cb: listener,
+                        count: 0,
+                        max,
+                    },
+                ]);
+            }
+            log(`Listeners:`, __classPrivateFieldGet(this, _Nestore_listeners, "f"));
+            return this;
+        }
         // &                                                                                             _
-        removeListener(path, listener, max = -1) { return this; }
+        removeListener(path, listener, max = -1) {
+            return this;
+        }
         // &                                                                                             _
         removeAllListeners(path) {
             if (!path) {
@@ -392,7 +360,83 @@
             __classPrivateFieldGet(this, _Nestore_anyListeners, "f").push(listener);
         }
         // &                                                                                             _
+        emitAll() { }
+        // &                                                                                             _
         emit(data) {
+            var _a;
+            const log = debug("emit");
+            log(linerule());
+            log(`Path: ${data.path}`);
+            log(`Key: ${data.key}`);
+            log(`Value: ${data.value}`);
+            for (const listenerPath of __classPrivateFieldGet(this, _Nestore_listeners, "f").keys()) {
+                log(`-----------\nComparing full path: \n"${listenerPath}"\n"${data.path}"\n`);
+                let splitListPath = listenerPath.split(__classPrivateFieldGet(this, _Nestore_settings, "f").delimiter);
+                let splitEmitPath = data.path.split(__classPrivateFieldGet(this, _Nestore_settings, "f").delimiter);
+                let doubleWild = 0;
+                if (splitEmitPath.every((item, idx) => {
+                    /** C - the custom path with wildcards attached to the cb */
+                    let cPath = splitListPath[idx];
+                    /** E - the path of the store item used in emit call */
+                    let ePath = item;
+                    // if no double wildcard - and cPath undefined - no match
+                    if (typeof cPath === 'undefined') {
+                        // if there was a double wildcard > and it occured before the current index
+                        if (doubleWild && idx > doubleWild) {
+                            log(`double wildcard used before index ${idx}`);
+                            return true;
+                        }
+                        log(colors.dim + `No item at index ${idx}`);
+                        return false;
+                    }
+                    // if a double wildcard is used > save its index to approve anything after
+                    if (cPath === "**") {
+                        doubleWild = idx;
+                        log(`Double wildcard used at index ${idx}`);
+                        return true;
+                    }
+                    // if a single wildcard is used > match only this idx
+                    if (cPath === "*") {
+                        log(`Single wildcard used at index ${idx}`);
+                        return true;
+                    }
+                    // if exact match > return true
+                    if (ePath === cPath) {
+                        log(`Item matched at index ${idx}:`, cPath, ePath);
+                        return true;
+                    }
+                    if (splitListPath.length < splitEmitPath.length && !doubleWild) {
+                        log(colors.RED + 'listPath longer than emitPath with no doublewild');
+                        return false;
+                    }
+                    log(colors.red + `No match at index ${idx}:`, item, splitListPath[idx]);
+                    return false;
+                })) {
+                    log(colors.green + 'C: ' + splitListPath);
+                    log(colors.GREEN + 'E: ' + splitEmitPath);
+                }
+            }
+            //+ This method works for a path that exactly matches the supplied path
+            //+ To loosely match paths > you must loop through each path in the map
+            //+ using listeners.keys()
+            // if the listener map has this path > get the array at path
+            if ((data === null || data === void 0 ? void 0 : data.path) && __classPrivateFieldGet(this, _Nestore_listeners, "f").has(data.path)) {
+                let listArr = (_a = __classPrivateFieldGet(this, _Nestore_listeners, "f").get(data.path)) !== null && _a !== void 0 ? _a : [];
+                // for each listener object > increment count if used and call cb
+                // create a new listener object array with all listObj that should be re-used
+                listArr = listArr.filter((listObj) => {
+                    if (listObj.max > 0) {
+                        listObj.count++;
+                    }
+                    listObj.cb(data);
+                    if (listObj.count < listObj.max) {
+                        return listObj;
+                    }
+                });
+                // overwrite the old listeners object array with the new one
+                __classPrivateFieldGet(this, _Nestore_listeners, "f").set(data.path, listArr);
+            }
+            //+ ---------------------------------------------------------------------
             return this;
         }
     }

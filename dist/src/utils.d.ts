@@ -1,0 +1,24 @@
+import createDebug from 'debug';
+export declare const debug: (name: string) => createDebug.Debugger;
+export declare const colors: {
+    reset: string;
+    bright: string;
+    dim: string;
+    underscore: string;
+    red: string;
+    green: string;
+    yellow: string;
+    blue: string;
+    magenta: string;
+    cyan: string;
+    white: string;
+    grey: string;
+    RED: string;
+    GREEN: string;
+    YELLOW: string;
+    BLUE: string;
+    MAGENTA: string;
+    CYAN: string;
+    WHITE: string;
+    GREY: string;
+};

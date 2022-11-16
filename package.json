@@ -7,12 +7,15 @@
   "browser": "dist/nestore.umd.js",
   "types": "dist/src/main.d.ts",
   "scripts": {
-    "test:node": "clear && node _tests/node/node.js",
-    "test:unit": "clear && mocha --config .mocharc.cjs \"_tests/unit/*.js\"",
-    "build": "clear && rm -rf dist && rollup -c rollup.config.js"
+    "test:node//+": "Use node to run the script runner from index.js",
+    "test:node":    "clear && node _tests/node/index.js",
+    "test:unit//+": "Use mocha to run the standard unit tests",
+    "test:unit":    "clear && mocha --config .mocharc.cjs \"_tests/unit/*.js\"",
+    "build//+":     "Compile, transpile, condense and shim with rollup",
+    "build":        "clear && rm -rf dist && rollup -c rollup.config.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["data-store", "state-management", "events"],
+  "author": "pratiqdev",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.20.2",

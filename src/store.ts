@@ -1,5 +1,5 @@
 /* eslint-disable */
-
+//@ts-nocheck
 const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/
 const reIsPlainProp = /^\w*$/
 
@@ -127,7 +127,7 @@ function toKey (value) {
   return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result
 }
 
-function baseGet (object, path) {
+function baseGet (object:unknown, path:string) {
   path = castPath(path, object)
 
   let index = 0
@@ -139,7 +139,7 @@ function baseGet (object, path) {
   return (index && index == length) ? object : undefined
 }
 
-export function GET (object, path, defaultValue) {
+export function GET (object:unknown, path:string, defaultValue?:unknown) {
   const result = object == null ? undefined : baseGet(object, path)
   return result === undefined ? defaultValue : result
 }
@@ -201,7 +201,7 @@ function assignValue(object, key, value) {
 }
 
 
-function baseSet(object, path, value, customizer) {
+function baseSet(object:unknown, path:string, value:unknown, customizer?:unknown) {
   if (!isObject(object)) {
     return object
   }
@@ -233,6 +233,6 @@ function baseSet(object, path, value, customizer) {
 }
 
 
-export function SET(object, path, value) {
+export function SET(object:unknown, path:string, value?:unknown) {
   return object == null ? object : baseSet(object, path, value)
 }
