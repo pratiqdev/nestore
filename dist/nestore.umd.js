@@ -362,6 +362,8 @@
         // &                                                                                             _
         emitAll() { }
         // &                                                                                             _
+        offAll() { }
+        // &                                                                                             _
         emit(data) {
             var _a;
             const log = debug("emit");
@@ -438,6 +440,18 @@
             }
             //+ ---------------------------------------------------------------------
             return this;
+        }
+        // &                                                                                              
+        get store() {
+            return __classPrivateFieldGet(this, _Nestore_store, "f");
+        }
+        // &                                                                                             _
+        get maxListeners() {
+            return __classPrivateFieldGet(this, _Nestore_settings, "f").maxListeners;
+        }
+        // &                                                                                             _
+        get delimiter() {
+            return __classPrivateFieldGet(this, _Nestore_settings, "f").delimiter;
         }
     }
     _Nestore_listeners = new WeakMap(), _Nestore_anyListeners = new WeakMap(), _Nestore_store = new WeakMap(), _Nestore_originalStore = new WeakMap(), _Nestore_settings = new WeakMap();

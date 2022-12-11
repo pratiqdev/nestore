@@ -54,88 +54,30 @@ const requiredProperties = [
     'delimiter'
 ]
 
-// describe(h1('1 | Basics'), ()=>{
+describe(h1('1 | Basics'), ()=>{
 
-//     it('The package provides a default export', () => {
-//         expect(typeof Nestore).to.not.eq('undefined')
-//     })
-
-//     it('The default export is a function named Nestore', () => {
-//         match(typeof Nestore, 'function')
-//         match(Nestore.name, 'Nestore')
-//     })
-
-    
-//     requiredMethods.forEach((method) => {
-//         const NST = new Nestore()
-//         it(`Nestore provides required method: "${method}"`, () => {
-//             expect(typeof NST[method]).to.eq('function')
-//         })
-//     })
-    
-    
-//     requiredProperties.forEach((prop) => {
-//         const NST =  new Nestore()
-//         it(`Nestore provides required property: "${prop}"`, () => {
-//             expect(typeof NST[prop]).to.not.eq('undefined')
-//         })
-//     })
-
-
-    
-
-
-// })
-
-
-describe.only(h1('X | Recurse Test'), () => {
-
-    it('recurses?', () => {
-        const NST = new Nestore({
-            woah: 'yeah',
-            how: {
-                nested: {
-                    can: 'you get!?'
-                }
-            }
+    describe('Provides basic requirements', () => {
+        it('The package provides a default export => a function named Nestore', () => {
+            match(typeof Nestore, 'function')
+            match(Nestore.name, 'Nestore')
         })
-
-        let list = [
-            'how',
-            'how.nested',
-            'how.nested.can',
-            'how.nested.can.you',
-            'how.nested.can.you.get',
-            'how.*',
-            'how.nested.*',
-            'how.nested.can.*',
-            'how.nested.can.you.*',
-            'how.**',
-            'how.nested.**',
-            'how.nested.can.**',
-            'how.nested.can.you.**',
-            'how',
-            '*.nested',
-            'how.*.can',
-            'how.nested.*.you',
-            'how.nested.can.*.get',
-            'how',
-            '*.nested',
-            '*.*.can',
-            'how.*.*.you',
-            'how.*.*.*.get',
-            'how.**',
-            'how.nested.**',
-            'how.**.1',
-        ]
-
-        list.forEach(item => NST.on(item, item => console.log('EMITTED:', item)))
         
-        NST.set('how.nested.can', { you: 'get!!!', arr: ['1', '2', '3']})
-        NST.set('how.nested.can.arr.1', 'shfifty-five')
-
-
-        let val = NST.get('how.nested.can')
-        console.log(val)
+        
+        requiredMethods.forEach((method) => {
+            const NST = new Nestore()
+            it(`Nestore provides required method: "${method}"`, () => {
+                expect(typeof NST[method]).to.eq('function')
+            })
+        })
+        
+        
+        requiredProperties.forEach((prop) => {
+            const NST =  new Nestore()
+            it(`Nestore provides required property: "${prop}"`, () => {
+                expect(typeof NST[prop]).to.not.eq('undefined')
+            })
+        })
+        
     })
+
 })

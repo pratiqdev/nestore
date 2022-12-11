@@ -159,6 +159,9 @@ class Nestore<T> {
   emitAll() {}
 
   // &                                                                                             _
+  offAll() {}
+
+  // &                                                                                             _
   emit(data: NestoreEmit) {
     const log = debug("emit");
     log(linerule())
@@ -254,6 +257,22 @@ class Nestore<T> {
 
     return this;
   }
+
+  // &                                                                                              
+  get store(){
+    return this.#store
+  }
+
+  // &                                                                                             _
+  get maxListeners(){
+    return this.#settings.maxListeners
+  }
+
+  // &                                                                                             _
+  get delimiter(){
+    return this.#settings.delimiter
+  }
+
 }
 
 export default Nestore;

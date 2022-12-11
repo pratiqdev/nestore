@@ -12,6 +12,10 @@ declare class Nestore<T> {
     off(path: string, listener: NestoreListener, max?: number): this;
     onAny(listener: NestoreListener): void;
     emitAll(): void;
+    offAll(): void;
     emit(data: NestoreEmit): this;
+    get store(): Partial<T>;
+    get maxListeners(): number;
+    get delimiter(): string;
 }
 export default Nestore;

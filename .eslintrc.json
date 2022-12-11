@@ -87,7 +87,7 @@
     "eqeqeq": ["warn", "always", { "null": "ignore" }],
     "func-call-spacing": ["warn", "never"],
     "generator-star-spacing": ["warn", { "before": true, "after": true }],
-    "indent": ["warn", 2, {
+    "indent": ["warn", 4, {
       "SwitchCase": 1,
       "VariableDeclarator": 1,
       "outerIIFEBody": 1,

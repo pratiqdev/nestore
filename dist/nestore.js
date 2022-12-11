@@ -341,6 +341,8 @@ class Nestore {
     // &                                                                                             _
     emitAll() { }
     // &                                                                                             _
+    offAll() { }
+    // &                                                                                             _
     emit(data) {
         const log = debug("emit");
         log(linerule());
@@ -416,6 +418,18 @@ class Nestore {
         }
         //+ ---------------------------------------------------------------------
         return this;
+    }
+    // &                                                                                              
+    get store() {
+        return this.#store;
+    }
+    // &                                                                                             _
+    get maxListeners() {
+        return this.#settings.maxListeners;
+    }
+    // &                                                                                             _
+    get delimiter() {
+        return this.#settings.delimiter;
     }
 }
 
