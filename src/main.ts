@@ -43,6 +43,23 @@ const nestoreDefaultSettings = {
   maxListeners: -1,
 };
 
+/*
+class Nestore<T> extends EE2{
+    
+    #INTERNAL_STORE: Partial<T>; 
+    #ORIGINAL_STORE: Partial<T>;
+    #DELIMITER_CHAR: string;
+    #SETTER_FUNCTIONS: string[];
+
+
+function NST<T>(store?: T, options?: T_NestoreOptions): Partial<Nestore<T>> {
+    return new Nestore<Partial<T>>(store, options)
+    // let nst = new Nestore<Partial<T>>(store, options)
+    // return omit(nst, nst.#SETTER_FUNCTIONS)
+}
+
+*/
+
 // ~                                                                                               _
 // ~                                                                                               _
 class Nestore<T> {
@@ -54,7 +71,7 @@ class Nestore<T> {
   #settings: NestoreOptions;
 
   constructor(
-    initialStore: Partial<T> = {},
+    initialStore: T = {},
     options: NestoreOptions = nestoreDefaultSettings
   ) {
     const log = debug("init");
