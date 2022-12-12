@@ -1,4 +1,4 @@
-import { NestoreEmit, NestoreOptions, NestoreListener } from "./types.js";
+import { NestoreEmit, NestoreListenerObject, NestoreOptions, NestoreListener } from "./types.js";
 declare class Nestore<T> {
     #private;
     constructor(initialStore?: Partial<T>, options?: NestoreOptions);
@@ -17,5 +17,6 @@ declare class Nestore<T> {
     get store(): Partial<T>;
     get maxListeners(): number;
     get delimiter(): string;
+    get listeners(): (((data: NestoreEmit) => unknown) | [string, NestoreListenerObject[]])[];
 }
 export default Nestore;

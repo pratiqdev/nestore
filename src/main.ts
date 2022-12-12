@@ -273,6 +273,22 @@ class Nestore<T> {
     return this.#settings.delimiter
   }
 
+  //~                                                                                               
+  get listeners(){
+    return [...this.#anyListeners, ...this.#listeners]
+  }
+
+  //~                                                                                               
+  get settings(){
+    return this.#settings
+  }
+
+  //~                                                                                               
+  get originalStore(){
+    return this.#originalStore
+  }
+
+
 }
 
 export default Nestore;

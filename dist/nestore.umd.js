@@ -453,6 +453,10 @@
         get delimiter() {
             return __classPrivateFieldGet(this, _Nestore_settings, "f").delimiter;
         }
+        //- ______________________________________________________________________________________________
+        get listeners() {
+            return [...__classPrivateFieldGet(this, _Nestore_anyListeners, "f"), ...__classPrivateFieldGet(this, _Nestore_listeners, "f")];
+        }
     }
     _Nestore_listeners = new WeakMap(), _Nestore_anyListeners = new WeakMap(), _Nestore_store = new WeakMap(), _Nestore_originalStore = new WeakMap(), _Nestore_settings = new WeakMap();
 

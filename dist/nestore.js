@@ -431,6 +431,10 @@ class Nestore {
     get delimiter() {
         return this.#settings.delimiter;
     }
+    //- ______________________________________________________________________________________________
+    get listeners() {
+        return [...this.#anyListeners, ...this.#listeners];
+    }
 }
 
 export { Nestore as default };
