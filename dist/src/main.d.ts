@@ -18,5 +18,7 @@ declare class Nestore<T> {
     get maxListeners(): number;
     get delimiter(): string;
     get listeners(): (((data: NestoreEmit) => unknown) | [string, NestoreListenerObject[]])[];
+    get settings(): NestoreOptions;
+    get originalStore(): Partial<T>;
 }
 export default Nestore;

@@ -248,6 +248,7 @@ const nestoreDefaultSettings = {
 class Nestore {
     #listeners;
     #anyListeners;
+    // #store: Partial<T>;
     #store;
     #originalStore;
     #settings;
@@ -431,9 +432,17 @@ class Nestore {
     get delimiter() {
         return this.#settings.delimiter;
     }
-    //- ______________________________________________________________________________________________
+    //~                                                                                               
     get listeners() {
         return [...this.#anyListeners, ...this.#listeners];
+    }
+    //~                                                                                               
+    get settings() {
+        return this.#settings;
+    }
+    //~                                                                                               
+    get originalStore() {
+        return this.#originalStore;
     }
 }
 

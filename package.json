@@ -5,7 +5,7 @@
   "type": "module",
   "module": "dist/nestore.js",
   "browser": "dist/nestore.umd.js",
-  "types": "dist/src/main.d.ts",
+  "types": "dist/src/types.d.ts",
   "scripts": {
     "//& test:build": "rebuild the application before testing",
     "test:build": "clear && rm -rf dist && rollup -c rollup.config.js",

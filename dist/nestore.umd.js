@@ -269,6 +269,7 @@
         constructor(initialStore = {}, options = nestoreDefaultSettings) {
             _Nestore_listeners.set(this, void 0);
             _Nestore_anyListeners.set(this, void 0);
+            // #store: Partial<T>;
             _Nestore_store.set(this, void 0);
             _Nestore_originalStore.set(this, void 0);
             _Nestore_settings.set(this, void 0);
@@ -453,9 +454,17 @@
         get delimiter() {
             return __classPrivateFieldGet(this, _Nestore_settings, "f").delimiter;
         }
-        //- ______________________________________________________________________________________________
+        //~                                                                                               
         get listeners() {
             return [...__classPrivateFieldGet(this, _Nestore_anyListeners, "f"), ...__classPrivateFieldGet(this, _Nestore_listeners, "f")];
+        }
+        //~                                                                                               
+        get settings() {
+            return __classPrivateFieldGet(this, _Nestore_settings, "f");
+        }
+        //~                                                                                               
+        get originalStore() {
+            return __classPrivateFieldGet(this, _Nestore_originalStore, "f");
         }
     }
     _Nestore_listeners = new WeakMap(), _Nestore_anyListeners = new WeakMap(), _Nestore_store = new WeakMap(), _Nestore_originalStore = new WeakMap(), _Nestore_settings = new WeakMap();

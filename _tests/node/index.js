@@ -20,3 +20,7 @@ setTimeout(() => {
 setTimeout(() => {
     console.log('>>')
 }, 1000)
+
+
+
+NST.store.greeting

@@ -48,6 +48,7 @@ const nestoreDefaultSettings = {
 class Nestore<T> {
   #listeners: Map<string, NestoreListenerObject[]>;
   #anyListeners: ((data: NestoreEmit) => unknown)[];
+  // #store: Partial<T>;
   #store: Partial<T>;
   #originalStore: Partial<T>;
   #settings: NestoreOptions;
@@ -60,7 +61,7 @@ class Nestore<T> {
     log("Store:", initialStore);
     log("Options:", options);
 
-    this.#store = { ...initialStore };
+    this.#store = { ...initialStore }
     this.#originalStore = { ...initialStore };
     this.#listeners = new Map();
     this.#anyListeners = [];
@@ -259,7 +260,7 @@ class Nestore<T> {
   }
 
   // &                                                                                              
-  get store(){
+  get store():  Partial<T>{
     return this.#store
   }
 
