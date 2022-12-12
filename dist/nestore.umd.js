@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('debug')) :
-    typeof define === 'function' && define.amd ? define(['debug'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.nestore = factory(global.createDebug));
-})(this, (function (createDebug) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('debug')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'debug'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.nestore = {}, global.createDebug));
+})(this, (function (exports, createDebug) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -259,14 +259,21 @@
     //   return regex.test(str);
     // }
     // ~                                                                                               _
-    const nestoreDefaultSettings = {
-        delimiter: ".",
-        maxListeners: -1,
+    const defaults = {
+        settings: {
+            delimiter: ".",
+            maxListeners: -1,
+        }
+    };
+    const RecurseActions = {
+        GET: 'get',
+        SET: 'set',
+        RESET: 'reset'
     };
     // ~                                                                                               _
     // ~                                                                                               _
     class Nestore {
-        constructor(initialStore = {}, options = nestoreDefaultSettings) {
+        constructor(initialStore = {}, options = {}) {
             _Nestore_listeners.set(this, void 0);
             _Nestore_anyListeners.set(this, void 0);
             // #store: Partial<T>;
@@ -280,7 +287,7 @@
             __classPrivateFieldSet(this, _Nestore_originalStore, Object.assign({}, initialStore), "f");
             __classPrivateFieldSet(this, _Nestore_listeners, new Map(), "f");
             __classPrivateFieldSet(this, _Nestore_anyListeners, [], "f");
-            __classPrivateFieldSet(this, _Nestore_settings, Object.assign(nestoreDefaultSettings, options), "f");
+            __classPrivateFieldSet(this, _Nestore_settings, Object.assign(defaults.settings, options), "f");
         }
         // &                                                                                             _
         get(path) {
@@ -469,6 +476,9 @@
     }
     _Nestore_listeners = new WeakMap(), _Nestore_anyListeners = new WeakMap(), _Nestore_store = new WeakMap(), _Nestore_originalStore = new WeakMap(), _Nestore_settings = new WeakMap();
 
-    return Nestore;
+    exports.RecurseActions = RecurseActions;
+    exports["default"] = Nestore;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 }));

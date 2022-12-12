@@ -16,6 +16,10 @@ export declare type NestoreListenerObject = {
     cb: (data: NestoreEmit) => unknown;
 };
 export declare type NestoreOptions = {
+    delimiter?: string;
+    maxListeners?: number;
+};
+export declare type NestoreOptionsInternal = {
     delimiter: string;
     maxListeners: number;
 };

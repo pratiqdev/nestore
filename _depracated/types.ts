@@ -29,39 +29,3 @@
 //           | Extract<T[FieldKey], undefined>
 //         : undefined
 //       : undefined
-
-export type NestoreEmit = {
-  path:string;
-  key:string;
-  value:unknown;
-}
-
-export type NestoreListener = (data:NestoreEmit) => unknown;
-
-export const RecurseActions = {
-  GET: 'get',
-  SET: 'set',
-  RESET: 'reset'
-} as const
-
-export type RecurseActionTypes = typeof RecurseActions[keyof typeof RecurseActions]
-
-export type NestoreListenerObject = {
-  count: number;
-  max: number;
-  cb: (data: NestoreEmit) => unknown;
-}
-
-export type NestoreOptions = {
-  delimiter: string;
-  maxListeners: number;
-}
-
-export type RecurseConfig = {
-  path: string;
-  action: RecurseActionTypes;
-  value?: unknown;
-  foundPath?: string;
-  foundKey?:string;
-  foundVal?: unknown;
-}

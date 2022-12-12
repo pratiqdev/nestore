@@ -239,9 +239,16 @@ const linerule = () => `-`.repeat(process.stdout.columns - 20);
 //   return regex.test(str);
 // }
 // ~                                                                                               _
-const nestoreDefaultSettings = {
-    delimiter: ".",
-    maxListeners: -1,
+const defaults = {
+    settings: {
+        delimiter: ".",
+        maxListeners: -1,
+    }
+};
+const RecurseActions = {
+    GET: 'get',
+    SET: 'set',
+    RESET: 'reset'
 };
 // ~                                                                                               _
 // ~                                                                                               _
@@ -252,7 +259,7 @@ class Nestore {
     #store;
     #originalStore;
     #settings;
-    constructor(initialStore = {}, options = nestoreDefaultSettings) {
+    constructor(initialStore = {}, options = {}) {
         const log = debug("init");
         log("Store:", initialStore);
         log("Options:", options);
@@ -260,7 +267,7 @@ class Nestore {
         this.#originalStore = { ...initialStore };
         this.#listeners = new Map();
         this.#anyListeners = [];
-        this.#settings = Object.assign(nestoreDefaultSettings, options);
+        this.#settings = Object.assign(defaults.settings, options);
     }
     // &                                                                                             _
     get(path) {
@@ -446,4 +453,4 @@ class Nestore {
     }
 }
 
-export { Nestore as default };
+export { RecurseActions, Nestore as default };
