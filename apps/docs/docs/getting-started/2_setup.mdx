@@ -1,0 +1,101 @@
+---
+sidebar_position: 4
+sidebar_label: Setup
+---
+
+# Setup a Store
+
+Setup is super easy - create, export and use your store. 
+
+{/* TODO- Setup page should just be a basic example of how to setup the store and write a simple mutatur */}
+
+
+
+
+## Create a Store
+
+Import nestore and initialize with a store - an object containing your state. See 
+**[configuration/store](/docs/api/configuration/store)** for more details
+
+```tsx title="myStore.js"
+import nestore from 'nestore'
+
+const nst = nestore({
+
+  logged_in: false,
+  user: null,
+  messages: [],
+
+  login: (NST, [name, password]) => {
+    NST.set('logged_in', true)
+    NST.store.user = name
+  }
+
+})
+
+export default nst
+```
+
+
+
+
+## Provide Options
+
+See **[configuration/options](/docs/api/configuration/options)** for more details
+
+```tsx 
+import nestore from 'nestore'
+
+const nst = nestore({
+  store: 'data',
+  // ...
+}, {
+  delimeter: '~',
+  adapters: [],
+})
+
+export default nst
+```
+
+
+
+
+
+
+## Register Listeners
+
+Then import your store, register listeners in any location and on any path. See 
+**[listeners](/docs/api/events/listeners)** for more details
+
+```jsx
+import nst from './myStore.js'
+
+nst.once('@ready', ({ key, path, value }) => {
+    console.log(`Nestore initialized...`)
+})
+
+nst.on('user', ({ key, path, value }) => {
+    console.log(`Logged in as ${value}`)
+})
+```
+
+
+
+
+
+
+## Mutate the Store
+
+Mutate the store directly, or use the `set()` method to emit events for that kay/path. See 
+**[set](/docs/api/store/set)** or **[mutate](/docs/api/store/mutators)** for more details
+
+```jsx
+import nst from './myStore.js'
+
+nst.store.user = null       // no emit
+nst.store.logged_in = false // no emit
+
+
+nst.login('Alice', '1234')
+nst.set('messages', [...messages])
+```

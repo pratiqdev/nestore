@@ -1,0 +1,27 @@
+---
+sidebar_position: 2
+sidebar_label: Update Values
+---
+
+# Update the Store
+
+
+You can manually update/create values/keys externally using the set method or by updating the value 
+directly. You can also update the entire store using either of these methods. Setting the value to 
+null or undefined will not remove the key from the store.
+
+```jsx title="myStore.js"
+import nst from './myStore.js'
+
+nst.logged_in = false
+nst.set('user_name', null)
+```
+
+
+Setting the value to null or undefined will not remove the key from the store 
+
+```jsx title="myStore.js"
+nst.set('user_name', )
+nst.set('user_name', null)
+nst.set('user_name', undefined)
+```

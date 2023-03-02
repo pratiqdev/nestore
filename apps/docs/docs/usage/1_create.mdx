@@ -1,0 +1,101 @@
+---
+sidebar_position: 1
+sidebar_label: Create a Store
+title: Create a Store
+---
+
+## Initial Store
+
+
+Invoke nestore with an object with any keys/values to setup the initial state. See 
+**[api/store](/docs/api/configuration/store)** for more details
+
+```jsx title="myStore.js"
+import nestore from 'nestore'
+
+const nst = nestore({ 
+    logged_in: false,
+    user_name: null,
+    time: Date.now(),
+    1: 'Two',
+})
+
+export default nst
+```
+
+
+
+
+## Mutators
+
+You can also register 'in-store' mutators to keep logic and state in a central location. See 
+**[api/store/mutators](/docs/api/store/mutators)** for more details
+
+```jsx
+const nst = nestore({
+    error: null, 
+    logged_in: false,
+    user_name: null,
+    time: Date.now(),
+
+    getTime:    () => Date.now(),
+    setTime:    (NST) => NST.set('time', Date.now()),
+    customTime: (NST, args) => NST.set('time', args[0]),
+    
+    // highlight-start
+    login: async (NST, [name, pwrd]) => {
+        let user = await Users.findOne({ where: { user_name: name }})
+
+        if(!user){
+            NST.set('error', 'No user found...')
+            return false
+        }
+
+        NST.store.user_name = user.user_name
+        NST.store.logged_in = true
+
+        return user
+    }
+    // highlight-end
+
+})
+```
+
+Nestore will expose these functions for use outside the store
+
+```jsx
+import nst from  './myStore.js'
+
+const user = await nst.login('AliceAware11', 'password1234')
+// await nst.login('AliceAware11', 'password1234')
+// nst.login('AliceAware11', 'password1234')
+```
+
+
+
+
+
+
+## Listeners
+
+Listeners can also be registered directly in the store with the `$` prefix. All listeners are 
+invoked with an object containing the `path` and `key` of the value that changed, as well as the 
+new value. See **[api/store/listeners](/docs/api/store/listeners)** for more details
+
+```jsx
+const nst = nestore({
+    logged_in: false,
+    user_name: null,
+
+    login: async (NST, [name, pwrd]) => {
+        // ...
+    },
+
+    // highlight-start
+    $user_name: ({ value }) => {
+        console.log(`The user ${value} has logged in!`)
+    },
+    // highlight-end
+
+})
+```

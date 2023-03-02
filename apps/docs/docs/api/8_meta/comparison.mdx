@@ -1,0 +1,193 @@
+---
+sidebar_position: 12
+sidebar_label: Comparisons
+---
+
+# Comparisons
+
+
+<table>
+<tr>
+    <td>Feature</td>
+    <td colspan="2">Solution</td>
+    <td>Comparison</td>
+</tr>
+
+
+<tr class="highlight-row">
+    <td rowspan="5">
+        <p>Mutability</p>
+        <small>Mutable store with persistent references</small>
+    </td>
+    <td><div class="check"/></td>
+    <td>Nestore</td>
+    <td className="small-text">Mutable store that can be mutated directly with or without triggering side-effects</td>
+</tr>
+<tr>
+    <td></td>
+    <td>Redux</td>
+    <td className="small-text">Immutable store that is only updated via actions and reducers</td>
+</tr>
+<tr>
+    <td></td>
+    <td>Zustand</td>
+    <td className="small-text">Immutable store updated via an in-store set method</td>
+</tr>
+<tr>
+    <td><div class="check"/></td>
+    <td>Valtio</td>
+    <td className="small-text">Similar to Zustand - except with a mutable store</td>
+</tr>
+<tr>
+    <td><div class="check"/></td>
+    <td>Jotai</td>
+    <td className="small-text">Immutable 'read-only' store using atomic 'pieces'</td>
+</tr>
+
+
+
+
+
+
+
+<tr class="highlight-row">
+    <td rowspan="5">
+        <p>Flux Pattern</p>
+        <small>Unidirectional data flow (dispatcher, store, view)</small>
+    </td>
+    <td></td>
+    <td>Nestore</td>
+    <td className="small-text">Two-way data binding - pass data into and out of the store with any of the provided methods (impure functions and unpredictable time travel)</td>
+</tr>
+<tr>
+    <td><div class="check"/></td>
+    <td>Redux</td>
+    <td className="small-text">Predictable and fully repeatable with one-way data binding with pure dispatch functions (predictable time travel)</td>
+</tr>
+<tr>
+    <td></td>
+    <td>Zustand</td>
+    <td className="small-text">*Possible with user-created actions / dispatchers / reducers</td>
+</tr>
+    <tr>
+    <td></td>
+    <td>Valtio</td>
+    <td className="small-text"></td>
+</tr>
+<tr>
+    <td><div class="check"/></td>
+    <td>Jotai</td>
+    <td className="small-text">Uses proxy-state to observe changes without selecting or differencing</td>
+</tr>
+
+
+
+
+
+
+
+<tr class="highlight-row">
+    <td rowspan="5">
+        <p>Wildcard</p>
+        <small>Access and mutate the store using a wildcard character</small>
+    </td>
+    <td><div class="check"/></td>
+    <td>Nestore</td>
+    <td className="small-text">Store and events take advantage of wildcard and nested wildcard path strings</td>
+</tr>
+<tr>
+    <td></td>
+    <td>Redux</td>
+    <td className="small-text">No built-in usage of wildcards</td>
+</tr>
+<tr>
+    <td></td>
+    <td>Zustand</td>
+    <td className="small-text">No built-in usage of wildcards</td>
+</tr>
+<tr>
+    <td></td>
+    <td>Valtio</td>
+    <td className="small-text">No built-in usage of wildcards</td>
+</tr>
+<tr>
+    <td><div class="check"/></td>
+    <td>Jotai</td>
+    <td className="small-text">Similar to Zustand - except with a mutable store</td>
+</tr>
+
+
+
+
+
+
+<tr class="highlight-row">
+    <td rowspan="5">
+        <p>Middleware / Adapters</p>
+        <small>Intercept and modify data / actions / payloads</small>
+    </td>
+    <td><div class="check"/></td>
+    <td>Nestore</td>
+    <td className="small-text">(Adapters - access and mutate the store at any time and in any order (non-sequential)</td>
+</tr>
+    <tr>
+    <td><div class="check"/></td>
+    <td>Redux</td>
+    <td className="small-text">Provides a third-party extension point between dispatching an action, and the moment it reaches the reducer. </td>
+</tr>
+    <tr>
+    <td><div class="check"/></td>
+    <td>Zustand</td>
+    <td className="small-text">Zustand is interoperable with middleware as wrapper functions</td>
+</tr>
+    <tr>
+    <td></td>
+    <td>Valtio</td>
+    <td className="small-text">No support for middleware or adapters</td>
+</tr>
+<tr>
+    <td><div class="check"/></td>
+    <td>Jotai</td>
+    <td className="small-text">No suport for adapters or middleware</td>
+</tr>
+
+
+
+
+
+
+
+<tr class="highlight-row">
+    <td rowspan="5">
+        <p>Events</p>
+        <small>Listen to and emit events</small>
+    </td>
+    <td><div class="check"/></td>
+    <td>Nestore</td>
+    <td className="small-text">Nestore extends the Event Emitter class with <code>eventemitter2</code></td>
+</tr>
+    <tr>
+    <td></td>
+    <td>Redux</td>
+    <td className="small-text"></td>
+</tr>
+    <tr>
+    <td></td>
+    <td>Zustand</td>
+    <td className="small-text">Z</td>
+</tr>
+    <tr>
+    <td></td>
+    <td>Valtio</td>
+    <td className="small-text"></td>
+</tr>
+<tr>
+    <td><div class="check"/></td>
+    <td>Jotai</td>
+    <td className="small-text">Uses proxy-state to observe changes without selecting or differencing</td>
+</tr>
+
+
+
+
+</table>

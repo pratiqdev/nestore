@@ -1,0 +1,49 @@
+---
+sidebar_position: 4
+sidebar_label: Installation
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import meta from '@site/meta.js'
+
+# Installing the Package
+
+
+Install the package with your preferred package manager, or just use **[Pnpm](https://pnpm.io/)**!
+
+
+<Tabs>
+
+<TabItem value="pnpm" label="Pnpm" default>
+<pre>
+$ pnpm add {meta.npm_package_path}
+</pre>
+</TabItem>
+
+<TabItem value="npm" label="NPM" >
+<pre>
+$ npm install {meta.npm_package_path}
+</pre>
+</TabItem>
+
+<TabItem value="yarn" label="Yarn" >
+<pre>
+$ yarn add {meta.npm_package_path}
+</pre>
+</TabItem>
+
+
+</Tabs>
+
+Or request the package from a cdn
+```jsx
+<script src="https://unpkg.com/nestore"></script>
+```
+
+Nestore depends on `lodash-es` and `eventemitter2`
+
+:::tip New deployment available
+The original package `nestore@1.1.44` has been deprecated and removed from npm and will be replaced with `nestore@0.0.45`
+and will follow standard semantic-versioning practices starting with `v0.0.45`
+:::

@@ -1,0 +1,56 @@
+---
+sidebar_position: 2
+sidebar_label: Access the Store
+---
+
+# Access the Store
+
+All values are available through the store except in-store-mutators. Use the get method for easy or 
+programmatic access to paths, or access the values directly through the store. Later we will react 
+to changes with events.
+
+:::note
+The store is a mutable object with persistent references. Any direct access to `nst.store.path`
+or `nst.store[path]` will return that value with its current reference. Be cautious of unintended updates to store values 
+by reference.
+:::
+
+```jsx title="myStore.js"
+import nst from './myStore.js'
+
+let loggedIn = nst.get('logged_in')
+let captain = nst.store.captains_name
+
+// look at me
+captain = 'I am the captain now'
+
+// I am the captain now
+console.log(nst.store.captains_name) 
+```
+
+
+
+1. install
+1. create basic store in store.js
+1. supply a simple config option
+1. -
+1. import store.js in app.js
+1. register a listener on the store `nst.on('logged_in', ({ key, value, path }) => { console.log('Listener!') })`
+1. set a value to trigger the update `nst.set('logged_in', false)`
+1. quietly set a value on the store `nst.store.nonsense_value = 'blah blah'`
+1. -
+1. move the listener to the store as `$logged_in: ({ value }) => { console.log('In store listener!') },`
+1. trigger that moved listener as usual `nst.set('logged_in', true)`
+1. -
+1. create an async login function 
+    - takes `username` and `password`
+    - awaits mutation of db `await Users.findOne()`
+    - checks if the user exists and sets the error value `nst.set('error', ...)` and returns null
+    - sets logged in to true loud `nst.set('logged_in', true)`
+    - sets the username `nst.set('user_name', user.user_name)`
+    - return the user or true
+1. invoke the function with `login('', '')`
+1. expect listener callback to be invoked `nst.on('user_name', ({ key, value }) => { ... })`
+1. move that async login function into the store as `login: async (NST, [name, pwrd]) => { ... },`
+1. trigger that async function with `nst.login('', '')`
+1. expect listener callback to be invoked `nst.on('user_name', ({ key, value }) => { ... })`

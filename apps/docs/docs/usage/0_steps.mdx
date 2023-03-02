@@ -1,0 +1,290 @@
+---
+sidebar_position: 2
+sidebar_label: All Steps
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import meta from '@site/meta.js'
+
+# Full Docs Walkthrough
+
+
+# Installing the Package
+
+
+Install the package with your preferred package manager, or just use **[Pnpm](https://pnpm.io/)**!
+
+
+<Tabs>
+
+<TabItem value="pnpm" label="Pnpm" default>
+<pre>
+$ pnpm add {meta.npm_package_path}
+</pre>
+</TabItem>
+
+<TabItem value="npm" label="NPM" >
+<pre>
+$ npm install {meta.npm_package_path}
+</pre>
+</TabItem>
+
+<TabItem value="yarn" label="Yarn" >
+<pre>
+$ yarn add {meta.npm_package_path}
+</pre>
+</TabItem>
+
+
+</Tabs>
+
+Or request the package from a cdn
+```jsx
+<script src="https://unpkg.com/nestore"></script>
+```
+
+Nestore depends on `lodash-es` and `eventemitter2`
+
+:::tip New deployment available
+The original package `nestore@1.1.44` has been deprecated and removed from npm and will be replaced with `nestore@0.0.45`
+and will follow standard semantic-versioning practices starting with `v0.0.45`
+:::
+
+
+
+---
+
+
+
+## Create a Store
+
+Import nestore and initialize with a store - an object containing your state. See 
+**[configuration/store](/docs/api/configuration/store)** for more details
+
+
+```jsx title="myStore.js"
+import nestore from 'nestore'
+
+const nst = nestore({
+
+  logged_in: false,
+  user: null,
+  messages: [],
+
+  login: (NST, [name, password]) => {
+    NST.set('logged_in', true)
+    NST.store.user = name
+  }
+
+})
+```
+
+
+
+
+## Provide Options
+
+See **[configuration/options](/docs/api/configuration/options)** for more details
+
+```jsx 
+const nst = nestore(initialStore, {
+  delimeter: '~',
+  adapters: [],
+})
+
+export default nst
+```
+
+
+
+
+
+## Import Anywhere
+
+Import your store and use it anywhere to access data or trigger events. 
+
+```jsx title="app.js"
+import nst from 'myStore.js'
+
+nst.set({
+    newStore: 'Yup',
+    emitEvent: 'only on new keys or keys with same path'
+})
+```
+
+
+
+
+
+## Register Listeners
+
+Register listeners in any location and on any path. See 
+**[listeners](/docs/api/events/listeners)** for more details
+
+```jsx
+nst.on('logged_in', ({ key, path, value }) => {
+    value && console.log(`Logged in!`)
+})
+```
+
+
+
+
+
+
+## Mutate the Store
+
+Use the `set()` method to update or set a value and emit events for that kay/path, or mutate the store
+directly without emitting events. See **[set](/docs/api/store/set)** or 
+**[mutate](/docs/api/store/mutators)** for more details
+
+```jsx
+nst.set('logged_in', false)
+nst.store.nonsense_value = 'No event emitted!'
+
+
+nst.login('Alice', '1234')
+nst.set('messages', [...messages])
+```
+
+
+
+### Original Usage Page ----------------------------------------------------------------------------------------------------------------------
+
+---
+sidebar_position: 4
+sidebar_label: Usage
+---
+
+# Using Nestore
+
+Setup is super easy - create, export and use your store. 
+
+
+
+
+
+
+## Create a Store
+
+Import nestore and initialize with a store - an object containing your state. See 
+**[configuration/store](/docs/api/configuration/store)** for more details
+
+
+```jsx title="myStore.js"
+import nestore from 'nestore'
+
+const nst = nestore({
+
+  logged_in: false,
+  user: null,
+  messages: [],
+
+  login: (NST, [name, password]) => {
+    NST.set('logged_in', true)
+    NST.store.user = name
+  }
+
+})
+
+export default nst
+```
+
+
+
+
+## Provide Options
+
+See **[configuration/options](/docs/api/configuration/options)** for more details
+
+
+```jsx 
+import nestore from 'nestore'
+
+const nst = nestore({
+  store: 'data',
+  // ...
+}, {
+  delimeter: '~',
+  adapters: [],
+})
+
+export default nst
+```
+
+
+
+
+## Register Listeners
+
+Then import your store, register listeners in any location and on any path. See 
+**[listeners](/docs/api/events/listeners)** for more details
+
+```jsx
+import nst from './myStore.js'
+
+nst.once('@ready', ({ key, path, value }) => {
+    console.log(`Nestore initialized...`)
+})
+
+nst.on('user', ({ key, path, value }) => {
+    console.log(`Logged in as ${value}`)
+})
+```
+
+
+
+
+
+
+## Mutate the Store
+
+Mutate the store directly, or use the `set()` method to emit events for that kay/path. See 
+**[set](/docs/api/store/set)** or **[mutate](/docs/api/store/mutators)** for more details
+
+```jsx
+import nst from './myStore.js'
+
+nst.store.user = null       // no emit
+nst.store.logged_in = false // no emit
+
+
+nst.login('Alice', '1234')
+nst.set('messages', [...messages])
+```
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+---
+
+1. install
+2. create basic store in store.js
+3. supply a simple config option
+ -
+4. import store.js in app.js
+5. register a listener on the store `nst.on('logged_in', ({ key, value, path }) => { console.log('Listener!') })`
+6. set a value to trigger the update `nst.set('logged_in', false)`
+7. quietly set a value on the store `nst.store.nonsense_value = 'blah blah'`
+ -
+8. move the listener to the store as `$logged_in: ({ value }) => { console.log('In store listener!') },`
+9. trigger that moved listener as usual `nst.set('logged_in', true)`
+ -
+10. create an async login function 
+    - takes `username` and `password`
+    - awaits mutation of db `await Users.findOne()`
+    - checks if the user exists and sets the error value `nst.set('error', ...)` and returns null
+    - sets logged in to true loud `nst.set('logged_in', true)`
+    - sets the username `nst.set('user_name', user.user_name)`
+    - return the user or true
+11. invoke the function with `login('', '')`
+12. expect listener callback to be invoked `nst.on('user_name', ({ key, value }) => { ... })`
+13. move that async login function into the store as `login: async (NST, [name, pwrd]) => { ... },`
+14. trigger that async function with `nst.login('', '')`
+15. expect listener callback to be invoked `nst.on('user_name', ({ key, value }) => { ... })`

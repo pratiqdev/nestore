@@ -1,0 +1,10 @@
+{
+  "position": 4,
+  "label": "Events",
+  "collapsible": true,
+  "collapsed": true,
+  "className": "red",
+  "link": {
+    "title": "The Store"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "position": 6,
+  "label": "Middleware",
+  "collapsible": true,
+  "collapsed": true,
+  "className": "red",
+  "link": {
+    "title": "Middleware"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "position": 1000,
+  "label": "Meta",
+  "collapsible": true,
+  "collapsed": true,
+  "className": "red",
+  "link": {
+    "title": "Meta"
+  }
+}

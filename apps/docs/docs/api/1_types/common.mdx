@@ -1,0 +1,162 @@
+---
+sidebar_position: 1
+sidebar_label: Common
+---
+
+# Common Types
+
+<!-- 
+Should I just include the relevant types next to each example? Only a few types are relevant...
+- could use tabs/tabItems to group js / ts + types codeblocks
+-->
+
+
+:::caution EXAMPLE ONLY
+These types only include user generated type definitions (more generated from other packages - 
+adapters) and are likely to change
+:::
+
+```tsx
+/** Nestore Class
+ * @param initialStore - NST
+ * @returns NSTInstance - instance of Nestore NSTInstance
+ */
+declare class Nestore<T> extends EE2 { // 'eventemitter2'
+    constructor(
+      initialStore?: T | Partial<T>, 
+      options?: NSTOptions
+    );
+
+    registerAdapter: (adapter: NSTAdapter) => Promise<boolean>;
+
+    set: (path: string | Partial<T>, value?: unknown, flag?: NSTEmitFlags) => boolean | Promise<boolean> | undefined;
+    get(path?: string | ((store: NSTStore) => unknown)): unknown;
+    reset: () => void;
+    remove: (path: string) => void;
+
+    adapters: {
+        [key: string]: NSTAdapterFunctions;
+    };
+}
+declare const nestore: NSTFunction;
+type NSTAdapter = <T>(nst: NSTInstance) => Promise<NSTAdapterFunctions>;
+```
+
+
+
+```tsx
+/**
+ * NST adapters return a set of functions that can be used to interact with the adapter.
+ * Adapters can be referenced at `nst.adapters.namespace` and will always contain the namespace property
+ * as well as other optional adapter specific properties and methods (most commonly `save` and `load` methods)
+*/
+type NSTAdapterFunctions = {
+    namespace: string;
+    [key: string]: unknown;
+};
+
+type NSTDevExtSubscribeCb = (message: {
+    state?: unknown;
+}) => unknown;
+
+type NSTDevExtSendFunction = (data: NSTDevExtSendData, store: NSTStore) => unknown;
+
+type NSTDevExt = {
+    init: (store: NSTStore) => unknown;
+    subscribe: (callback: NSTDevExtSubscribeCb) => unknown;
+    send: NSTDevExtSendFunction;
+};
+
+type NSTDevExtSendData = {
+    type: string;
+    path: string;
+    value: unknown;
+    previousValue: unknown;
+};
+```
+
+
+
+```tsx
+/** Async function that parses store and options, instantiates Nestore and resolves with the instance
+ *
+ * @params Object - initialStore - The user generated object containing the state
+ * @params NSTOptions - An object containing options used to configure the new Nestore instance
+ *
+ * @returns Promise\<NSTInstance> - The current instance of Nestore
+*/
+type NSTFunction = <T>(initialStore: T | Partial<T>, options: NSTOptions, sync?: boolean) => NSTInstance | Promise<NSTInstance>;
+
+declare const nst: Nestore<unknown>;
+type NSTInstance = typeof nst;
+type NSTOptions = {
+    /** The character used to separate / delimit nested paths */
+    delimiter?: string;
+    maxListeners?: number;
+    verbose?: boolean;
+    adapters?: NSTAdapter[];
+    preventRepeatUpdates?: boolean;
+    devTools?: boolean;
+};
+```
+
+
+
+```tsx
+/** Structure of data object emitted by Nestore events and passed to listeners as the only argument when invoked.
+ * `nst.onAny()` listeners will only be invoked with a string of the path that was updated.
+ */
+type NSTEmit = {
+    path: string;
+    key: string;
+    value?: unknown;
+};
+```
+
+
+
+```tsx
+/** Flags used to alter the behavior of emitting events when the state is updated.
+ *
+ * 'none' - do not emit any events
+ * 'emit' - (default) emit event for this path
+ * 'all' - recursively emit events for every item in the (new) store
+ */
+type NSTEmitFlags = 'none' | 'emit' | 'all';
+type NSTStore = {
+    [key: string | number | symbol]: NSTStoreMutator | NSTStoreListener | unknown;
+};
+```
+
+
+
+```tsx
+/** Custom mutator functions exist in the store and can be invoked to update the state
+ *
+ * @params Nestore<Partial<T>> - this - a reference to the current instance
+ * @params unknown[] -
+ *
+ * @returns unknown
+*/
+type NSTStoreMutator = (nst: NSTInstance, ...args: unknown[]) => unknown;
+type NSTStoreListener = (nst: NSTInstance, event: NSTEmit) => unknown;
+type NSTAdapterGenerator = (...args:unknown[]) => <T>(nestore: Nestore<T>) => void;
+type NSTGetter = <T>(currentStore: Partial<T>) => Partial<T>;
+```
+
+
+
+```tsx
+type NSTEmit = {
+      path: string;
+      key: string;
+      value?: unknown;
+  }
+```
+
+
+
+```tsx
+export type NestoreFunction = <T>(initialStore?: T, options?: NestoreOptions) => Nestore<T>
+export type NestoreAdapterReturn = <T>(nestore: Nestore<T>) => void;
+```
