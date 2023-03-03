@@ -6,11 +6,13 @@ import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import HomepageExamples from '@site/src/components/HomepageExamples';
 import Head from '@docusaurus/Head';
+import mainFunc from '@nst/nestore'
 
 import styles from './index.module.css';
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
+  console.log('nestore import:', mainFunc())
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <Head>
@@ -22,6 +24,10 @@ function HomepageHeader() {
       <div className="container">
         <h1 className="hero__title">{siteConfig.title} <code className={styles.beta}>beta</code></h1>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
+        
+
+
+
         <div className={styles.buttons}>
           <Link
             className="button button--primary button--md"

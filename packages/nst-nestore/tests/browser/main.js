@@ -1,0 +1,1 @@
+console.log('browser:test-1',mainFunc())

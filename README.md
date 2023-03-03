@@ -9,7 +9,7 @@ This Turborepo includes the following:
 ### Apps and Packages
 
 - `docs`: A placeholder documentation site powered by [Next.js](https://nextjs.org/)
-- `@nst/core`: core React components
+- `@nst/nestore`: core React components
 - `@nst/utils`: shared React utilities
 - `@nst/tsconfig`: shared `tsconfig.json`s used throughout the monorepo
 - `eslint-config-nst`: ESLint preset
