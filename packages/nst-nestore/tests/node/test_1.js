@@ -1,3 +1,7 @@
-import func from '../../dist/index.js'
+import createNestore from '../../dist/index.js'
 
-console.log('node:test-1:', func())
+const nst = createNestore({
+    greeting: 'ayo'
+})
+
+console.log('node:test-1:', nst.get('greeting'))

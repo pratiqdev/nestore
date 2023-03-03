@@ -24,11 +24,46 @@ each new feature. The client-side framework connectors will be provided as separ
 
 ### Timeline
 
+
+#### <code>0.1.0</code> 
+- Simple function that takes an `initialState` object and returns a proxy to that object.
+- The proxy contains the methods:
+  - get: get a value at the provided path
+  - set: set a value at the provided path
+  - reset: reset the store to its initial state
+  - delete: delete a key from the store
+  - store: a direct reference to the state of the store
+
+
+#### <code>0.2.0</code> 
+- add support for events with wildcards and double wildcards for nested routes
+- the event interface should have the following core methods:
+  - addListener('path', cb, -1)
+  - removeListener('path', cb)
+  - removeAllListeners('path' | undefined)
+  - onAny(cb) => addListener('*', cb)
+  - offAny(cb) => removeListener('*', cb)
+  - once('path', cb) => addListener('path', cb, 1)
+  - many('path', cb, 3) => addListener('path', cb, 3)
+
+
+
+
+
+
 #### <code>0.1.x</code> 
 - Simple event based store (get, set, addListener, removeListener)
-- manual type defs / automatic type inference
-- getter/setter function interop `get(s => s.key.here) | set(s => ({ ...s, new: 'value' }))  --> emitAll()`
+- setter function interop `set(s => ({ ...s, new: 'value' }))  --> emitAll()`
+  
+> ? is it possible to create a keymap of the old store, merge it with the keymap of the new store  
+> and emit the new values for all keys (undefined for removed keys)
 
+
+#### <code>0.2.x</code>
+- add support for wildcard paths and double wildcards (for nested paths)
+
+#### <code>0.2.x</code>
+- manual type defs / automatic type inference
 
 #### <code>0.2.x</code>
 - Redux-DevTools interop

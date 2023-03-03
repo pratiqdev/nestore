@@ -9,9 +9,10 @@
   "files": [
     "dist/**"
   ],
+  "type": "module",
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts src/types.ts",
-    "dev": "tsup src/index.ts --format esm --watch --dts src/types.ts",
+    "dev": "tsup",
     "//_dev": "tsup src/index.ts --format esm --watch --dts --external react",
     "lint": "eslint \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
@@ -30,12 +31,11 @@
   "tsup":{
     "name": "nestore",
     "entry": ["src/index.ts"],
-    "format": ["esm", "cjs"],
+    "format": ["esm"],
     "treeshake": true,
     "sourcemap": false,
     "clean": true,
     "shims": false,
-    "platform": "neutral",
     "target": "es2018",
     "bundle": true,
     "replaceNodeEnv": false,
