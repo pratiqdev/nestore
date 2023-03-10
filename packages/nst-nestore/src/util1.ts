@@ -1,7 +1,7 @@
-import { Thang } from "./types"
+import { Thang } from "./types";
 
-const util = (a?:string):Thang => {
-    return a ?? 'util1'
-}
+const util = (a?: string): Thang => {
+  return a ?? "util1";
+};
 
-export default util
+export default util;

@@ -91,7 +91,7 @@ const myStore = await nestore({
 `,
   },
   {
-    title: `Beta - PR's welcome!`,
+    title: `Alpha - PR's welcome!`,
     description: (
       <>
         Nestore is still in beta, contributions / issues / pull-requests are welcome!

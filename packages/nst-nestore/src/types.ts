@@ -1,12 +1,8 @@
-export type Thang = string 
-export type Whut = string | number
+export type Thang = string;
+export type Whut = string | number;
 
-interface Window {
-    myCustomProperty: string;
+declare global {
+  interface Window {
+    nestore?: () => unknown;
   }
-  
-  declare global {
-    interface Window {
-      mainFunc?: () => void;
-    }
-  }
+}

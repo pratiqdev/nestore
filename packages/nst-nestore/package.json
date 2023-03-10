@@ -15,7 +15,9 @@
     "dev": "tsup",
     "//_dev": "tsup src/index.ts --format esm --watch --dts --external react",
     "lint": "eslint \"src/**/*.ts*\"",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "test-node": "node tests/node/test_1",
+    "test-unit":"mocha"
   },
   "devDependencies": {
     "@nst/tsconfig": "workspace:*",
@@ -28,10 +30,14 @@
   "publishConfig": {
     "access": "public"
   },
-  "tsup":{
+  "tsup": {
     "name": "nestore",
-    "entry": ["src/index.ts"],
-    "format": ["esm"],
+    "entry": [
+      "src/index.ts"
+    ],
+    "format": [
+      "esm"
+    ],
     "treeshake": true,
     "sourcemap": false,
     "clean": true,
@@ -42,6 +48,12 @@
     "minify": false,
     "minifyWhitespace": false,
     "minifyIdentifiers": false,
-    "minifySyntax":false
+    "minifySyntax": false
+  },
+  "dependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
   }
 }

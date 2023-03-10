@@ -158,7 +158,7 @@ const config = {
       announcementBar: {
         id: 'alpha',
         content:
-          `Nestore is still in beta - watch for v1.0.0 on <a href="https://github.com/pratiqdev/nestore">GitHub</a>`,
+          `Nestore is still in alpha - watch for beta on <a href="https://github.com/pratiqdev/nestore">GitHub</a>`,
         backgroundColor: '#eef',
         textColor: '#002',
         isCloseable: true,
