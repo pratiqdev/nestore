@@ -1,5 +1,5 @@
 {
-  "extends": "@nst/tsconfig/react-library.json",
+  "extends": "@nestate/config/react-library.json",
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"]
 }

@@ -1,31 +1,35 @@
 {
-  "name": "@nst/nestore",
-  "version": "0.0.0",
+  "name": "@nestate/core",
+  "version": "0.0.1",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "files": [
-    "dist/**"
+    "dist/**",
+    "README.md"
   ],
-  "type": "module",
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts src/types.ts",
+    "build": "tsup src/index.ts --format esm --dts",
     "dev": "tsup",
     "//_dev": "tsup src/index.ts --format esm --watch --dts --external react",
     "lint": "eslint \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "test-node": "node tests/node/test_1",
-    "test-unit":"mocha"
+    "test-unit": "mocha"
+  },
+  "dependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
   },
   "devDependencies": {
-    "@nst/tsconfig": "workspace:*",
+    "@nestate/config": "workspace:*",
     "eslint": "^7.32.0",
-    "eslint-config-nst": "workspace:*",
     "react": "^17.0.2",
-    "tsup": "^5.10.1",
-    "typescript": "^4.5.3"
+    "tsup": "^6.6.3",
+    "typescript": "^4.9.5"
   },
   "publishConfig": {
     "access": "public"
@@ -49,11 +53,5 @@
     "minifyWhitespace": false,
     "minifyIdentifiers": false,
     "minifySyntax": false
-  },
-  "dependencies": {
-    "@types/chai": "^4.3.4",
-    "@types/mocha": "^10.0.1",
-    "chai": "^4.3.7",
-    "mocha": "^10.2.0"
   }
 }

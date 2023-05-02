@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Nestate Core",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "lib": ["es2015", "ES2020", "DOM"],
+    "module": "CommonJS",
+    "target": "es6"
+  }
+}

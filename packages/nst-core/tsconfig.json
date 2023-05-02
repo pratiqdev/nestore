@@ -1,5 +1,5 @@
 {
-  "extends": "@nestate/config/react-library.json",
+  "extends": "@nestate/config/core.json",
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"]
 }

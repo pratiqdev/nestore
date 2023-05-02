@@ -6,14 +6,14 @@ import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import HomepageExamples from '@site/src/components/HomepageExamples';
 import Head from '@docusaurus/Head';
-import createNestore from '@nst/nestore'
+// import createNestore from '@nestate/core'
 
 import styles from './index.module.css';
 
-const nst = createNestore({
-  greeting: 'ayo'
-})
-console.log('nestore import:', nst.get('greeting'))
+// const nst = createNestore({
+//   greeting: 'ayo'
+// })
+// console.log('nestore import:', nst.get('greeting'))
 
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();

@@ -3,21 +3,22 @@
   "type":"module",
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --no-cache --continue",
+    "dev": "turbo run build && pnpm run serve",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "turbo run build --filter=docs^... && changeset publish",
+    "serve": "pnpm --filter=docs run serve",
 
     "pre":"pnpm install && pnpm run build && clear",
-    "test-node":"pnpm run pre && pnpm --filter @nst/nestore run test-node"
+    "test-node":"pnpm run pre && pnpm --filter @nestate/core run test-node"
   },
   "devDependencies": {
+    "@nestate/config": "workspace:*",
     "@changesets/cli": "^2.22.0",
     "eslint": "^7.32.0",
-    "eslint-config-nst": "workspace:*",
     "prettier": "^2.5.1",
     "turbo": "latest"
   },

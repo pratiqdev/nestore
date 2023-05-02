@@ -1,15 +1,13 @@
 {
-  "name": "eslint-config-nst",
-  "version": "0.0.0",
+  "name": "@nestate/eslint",
+  "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "@babel/eslint-plugin": "^7.19.1",
     "eslint-plugin-react": "7.28.0"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "eslint-config-next": "^13.2.4",

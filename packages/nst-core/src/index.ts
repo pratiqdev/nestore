@@ -1,9 +1,24 @@
-type ProxyObject<T> = {
+declare global {
+  interface Window {
+    nestore?: () => unknown;
+  }
+}
+
+export type Thang = string;
+
+export type Whut = string | number;
+
+export type ProxyObject<T> = {
   [K in keyof T]: T[K] extends Record<string | number, unknown>
     ? ProxyObject<T[K]>
     : T[K];
 };
 
+
+
+
+
+//&                                                                                                 
 function createNestore<T extends Record<string | number, unknown>>(
   initialState: T = {} as T
 ): ProxyObject<T> & {

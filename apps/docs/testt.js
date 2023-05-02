@@ -1,5 +1,5 @@
 console.log('>><<')
 
-const mainFunc = require('@nst/nestore')
+const mainFunc = require('@nestate/core')
 
 console.log(mainFunc)
