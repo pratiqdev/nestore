@@ -4,30 +4,31 @@ declare global {
   }
 }
 
-export type Thang = string;
-
-export type Whut = string | number;
-
 export type ProxyObject<T> = {
   [K in keyof T]: T[K] extends Record<string | number, unknown>
     ? ProxyObject<T[K]>
     : T[K];
 };
 
-
-
-
-
-//&                                                                                                 
-function createNestore<T extends Record<string | number, unknown>>(
-  initialState: T = {} as T
-): ProxyObject<T> & {
+export type NestoreReturn<T> = ProxyObject<T> & {
   get<K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
   set(pathOrFunc: keyof T | ((state: T) => T), value?: unknown): void;
   reset(): void;
   delete<K extends keyof T>(pathOrFunc: K | ((state: T) => unknown)): void;
   store: T;
-} {
+}
+
+export type BaseRecord = Record<string | number, unknown>
+
+// export type StateGetter<T> = {
+//   <K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
+// };
+
+
+//&                                                                                                 
+function createNestore<T extends BaseRecord>(
+  initialState: T = {} as T
+): NestoreReturn<T> {
   let store: T = initialState;
 
   try {
@@ -37,13 +38,21 @@ function createNestore<T extends Record<string | number, unknown>>(
   }
 
   function get<K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K] {
+    let isGetter:boolean = typeof pathOrFunc === 'function'
+    let key:string;
+    let value: any;
+    let splitPath:
+
+    if(isGetter){
+
+    }
+
     console.log(
       "nst:get | invoked with:",
-      typeof pathOrFunc === "function" ? pathOrFunc.toString() : pathOrFunc
+      isGetter ? pathOrFunc.toString() : pathOrFunc
     );
-    const key = typeof pathOrFunc === "function" ? "" : pathOrFunc;
-    const value =
-      typeof pathOrFunc === "function" ? pathOrFunc(store) : undefined;
+    const key = isGetter ? "" : pathOrFunc;
+    const value = isGetter ? pathOrFunc(store): undefined;
     const path = key.toString().split(".");
 
     console.log("nst:get | k/v/p:", { key, value, path });
@@ -107,13 +116,7 @@ function createNestore<T extends Record<string | number, unknown>>(
     },
   });
 
-  return proxy as ProxyObject<T> & {
-    get<K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
-    set(pathOrFunc: keyof T | ((state: T) => T), value?: unknown): void;
-    reset(): void;
-    delete<K extends keyof T>(pathOrFunc: K | ((state: T) => unknown)): void;
-    store: T;
-  };
+  return proxy as NestoreReturn<T>
 }
 
 if (typeof window !== "undefined") {

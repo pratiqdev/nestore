@@ -11,6 +11,7 @@
     "version-packages": "changeset version",
     "release": "turbo run build --filter=docs^... && changeset publish",
     "serve": "pnpm --filter=docs run serve",
+    "test": "pnpm --filter=core run test",
 
     "pre":"pnpm install && pnpm run build && clear",
     "test-node":"pnpm run pre && pnpm --filter @nestate/core run test-node"

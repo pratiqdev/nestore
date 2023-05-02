@@ -1,8 +1,9 @@
 {
   "name": "@nestate/core",
   "version": "0.0.1",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "index.js",
+  "module":"dist/main.mjs",
+  "types": "dist/index.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "files": [
@@ -10,13 +11,13 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
+    "build": "tsup",
     "dev": "tsup",
     "//_dev": "tsup src/index.ts --format esm --watch --dts --external react",
     "lint": "eslint \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "test-node": "node tests/node/test_1",
-    "test-unit": "mocha"
+    "test": "clear && npm run build && mocha"
   },
   "dependencies": {
     "@types/chai": "^4.3.4",
@@ -33,25 +34,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "tsup": {
-    "name": "nestore",
-    "entry": [
-      "src/index.ts"
-    ],
-    "format": [
-      "esm"
-    ],
-    "treeshake": true,
-    "sourcemap": false,
-    "clean": true,
-    "shims": false,
-    "target": "es2018",
-    "bundle": true,
-    "replaceNodeEnv": false,
-    "minify": false,
-    "minifyWhitespace": false,
-    "minifyIdentifiers": false,
-    "minifySyntax": false
   }
 }
