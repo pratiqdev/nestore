@@ -148,10 +148,11 @@ function createNestore<T extends BaseRecord>(
     },
     deleteProperty(target, prop) {
       // Custom delete logic
-      console.log(`Deleting ${String(prop)}`);
-      if(!target) return false
+      let propString = String(prop)
+      console.log(`Deleting ${propString}`);
+      if(!target || internalProps.includes(propString)) return false
       if (prop in target) {
-        delete target[prop as string | number];
+        delete target[propString];
         return true;
       }
       return false;
