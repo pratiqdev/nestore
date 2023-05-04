@@ -17,7 +17,8 @@ function createNestore<T extends BaseRecord>(
   initialState: T = {} as T,
   options: NestoreOptions = {}
 ): NestoreReturn<T> {
-  let store = initialState as Partial<T>;
+  let store = JSON.parse(JSON.stringify(initialState)) as Partial<T>;
+  let originalStore = JSON.parse(JSON.stringify(initialState)) as Partial<T>;
   let globalDebugNamespace:string = ''
   const eventEmitter = new EventEmitter();
   
@@ -84,20 +85,10 @@ function createNestore<T extends BaseRecord>(
     }
   }
 
-  const _reset = () => {
-
-  }
-
-  const _del = () => {
-
-  }
 
 
-  
-
-
-  const proxy = new Proxy<Partial<T>>(store, {
-    get(target, prop, receiver) {
+  const proxyHandlers = {
+    get(target: Partial<T>, prop: string | symbol, receiver:any) {
       // Return the entire store if 'get' is invoked without arguments
       logger.get.log({
         target, prop, receiver
@@ -105,8 +96,12 @@ function createNestore<T extends BaseRecord>(
 
       if (prop === "get") return _get;
       if (prop === "set") return _set;
-      if (prop === "reset") return _reset;
-      if (prop === "delete") return _del;
+      if (prop === "reset") return () => {
+        Object.keys(target).forEach(key => {
+          delete target[key];
+        });
+        Object.assign(target, originalStore);
+      };
       // can already get all values in store from 'nst'
       // maybe this could return verbose store (with setters, listeners, etc.)
       // if (prop === "store") return store; 
@@ -132,7 +127,7 @@ function createNestore<T extends BaseRecord>(
 
       return Reflect.get(target, prop, receiver) as keyof typeof store
     },
-    set(target, prop, value, receiver) {
+    set(target: Partial<T>, prop: string | symbol, value: any, receiver: any) {
       const oldValue = Reflect.get(target, prop, receiver);
       const result = Reflect.set(target, prop, value, receiver);
 
@@ -146,7 +141,7 @@ function createNestore<T extends BaseRecord>(
 
       return result;
     },
-    deleteProperty(target, prop) {
+    deleteProperty(target: Partial<T>, prop: string | symbol) {
       // Custom delete logic
       let propString = String(prop)
       console.log(`Deleting ${propString}`);
@@ -157,7 +152,15 @@ function createNestore<T extends BaseRecord>(
       }
       return false;
     },
-  });
+  }
+
+
+
+
+  
+
+
+  const proxy = new Proxy<Partial<T>>(store, proxyHandlers);
 
 
   return proxy as NestoreReturn<T>

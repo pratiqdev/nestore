@@ -55,4 +55,30 @@ describe('PROXY METHODS', function () {
 
   });
 
+  it('C. Provides expected handlers and proxy (reset)', function () {
+    const nst = nestore({
+      greetings: "fellow humans",
+      count: 5,
+    })
+
+    expect(nst.greetings).to.eq('fellow humans')
+    expect(nst.count).to.eq(5)
+
+    delete nst.greetings
+    expect(nst.greetings).to.eq(undefined)
+    expect(nst.count).to.eq(5)
+    
+    delete nst.count
+    expect(nst.count).to.eq(undefined)
+
+    nst.reset()
+
+    expect(nst.greetings).eq('fellow humans')
+    expect(nst.count).eq(5)
+
+
+
+
+  });
+
 });
