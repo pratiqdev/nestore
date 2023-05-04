@@ -1,2 +1,7 @@
 spec:
- - "./tests/unit/*.test.js"
+  - "./tests/unit/*.test.js"
+  - "./tests/unit/*.test.ts"
+require:
+  - ts-node/register
+timeout: 5000
+reporter: spec

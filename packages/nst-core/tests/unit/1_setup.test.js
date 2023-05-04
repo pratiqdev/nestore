@@ -10,9 +10,8 @@ describe('nestore setup', function () {
       })
       console.log(nst)
 
-
-
       expect(typeof nestore).to.eq('function')
   });
+
 
 });

@@ -1,5 +1,5 @@
 {
   "extends": "@nestate/config/core.json",
-  "include": ["."],
+  "include": [".", "../../_deprecated/main.bk.ts"],
   "exclude": ["dist", "build", "node_modules"]
 }

@@ -1,136 +1,170 @@
-declare global {
-  interface Window {
-    nestore?: () => unknown;
-  }
-}
+import type { BaseRecord, NestoreOptions, GetterFunc, SetterFunc, Listener, NestoreReturn } from './types'
+import { colors, debug } from './debug';
+import EventEmitter from './event';
 
-export type ProxyObject<T> = {
-  [K in keyof T]: T[K] extends Record<string | number, unknown>
-    ? ProxyObject<T[K]>
-    : T[K];
-};
 
-export type NestoreReturn<T> = ProxyObject<T> & {
-  get<K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
-  set(pathOrFunc: keyof T | ((state: T) => T), value?: unknown): void;
-  reset(): void;
-  delete<K extends keyof T>(pathOrFunc: K | ((state: T) => unknown)): void;
-  store: T;
-}
 
-export type BaseRecord = Record<string | number, unknown>
 
-// export type StateGetter<T> = {
-//   <K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
-// };
+
+
+
+
+
 
 
 //&                                                                                                 
 function createNestore<T extends BaseRecord>(
-  initialState: T = {} as T
+  initialState: T = {} as T,
+  options: NestoreOptions = {}
 ): NestoreReturn<T> {
   let store: T = initialState;
+  let globalDebugNamespace:string = ''
+  const eventEmitter = new EventEmitter();
+  
+  //+ need to parse mutators and listeners before de-ref
+  // try {
+  //   store = JSON.parse(JSON.stringify(initialState));
+  // } catch (err) {
+  //   throw new Error(`Nestore: failed to parse 'initialStore'`);
+  // }
 
-  try {
-    JSON.parse(JSON.stringify(initialState));
-  } catch (err) {
-    throw new Error(`Nestore: failed to parse 'initialStore'`);
+
+  //&                                                                          
+  //$ HANDLE LOGGING AND DEBUG FLAGS
+  
+  if(options?.debug){
+    console.log(colors.primary.red + 'Options debug flag set:', options.debug, colors.modifiers.reset)
+    globalDebugNamespace = typeof options?.debug === 'string' ? options.debug : '*'
+  }
+  if(process?.env?.DEBUG){
+    console.log(colors.primary.red + 'Env debug flag set:', process.env.DEBUG, colors.modifiers.reset)
+    if(process.env.DEBUG === 'true'){
+      globalDebugNamespace = '*'
+    }else{
+      globalDebugNamespace = process.env.DEBUG
+    }
+  }
+  
+  const logger = {
+    init: debug('init', globalDebugNamespace),
+    get: debug('get', globalDebugNamespace),
+    set: debug('set', globalDebugNamespace),
   }
 
-  function get<K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K] {
-    let isGetter:boolean = typeof pathOrFunc === 'function'
-    let key:string;
-    let value: any;
-    let splitPath:
-
-    if(isGetter){
-
+  const _get = <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>): T | keyof T => {
+    if(!keyOrGetterFunc){
+      return store //as T
+    }
+    if (typeof keyOrGetterFunc === 'function') {
+      return (keyOrGetterFunc as GetterFunc<T>)(proxy);
     }
 
-    console.log(
-      "nst:get | invoked with:",
-      isGetter ? pathOrFunc.toString() : pathOrFunc
-    );
-    const key = isGetter ? "" : pathOrFunc;
-    const value = isGetter ? pathOrFunc(store): undefined;
-    const path = key.toString().split(".");
-
-    console.log("nst:get | k/v/p:", { key, value, path });
-    const result =
-      value ?? path.reduce((obj: any, key) => obj[key], value || store);
-    /*
-      the line `const result = path.reduce((obj, key) => obj[key], value || store);` throws a type 
-      error: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'T | NonNullable<T[K]>'.
-  No index signature with a parameter of type 'string' was found on type 'T | NonNullable<T[K]>'.ts(7053)
-
-
-      */
-    return result as T[K];
+    return proxy[keyOrGetterFunc] //as T[K]
   }
 
-  function set(pathOrFunc: keyof T | ((state: T) => T), value?: unknown): void {
-    console.log("nst:set | invoked with:", pathOrFunc, value);
-    const key = typeof pathOrFunc === "function" ? "" : pathOrFunc;
-    const newValue =
-      typeof pathOrFunc === "function" ? pathOrFunc(store) : value;
-    const path = key.toString().split(".");
-    let obj: any = store;
-    path.forEach((key, index) => {
-      if (index === path.length - 1) {
-        obj[key] = newValue;
+  const _set = <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => {
+    try{
+
+      if (typeof valueOrSetterFunc === 'function') {
+        proxy[key] = (valueOrSetterFunc as SetterFunc<T>)(proxy);
       } else {
-        obj = obj[key] as T;
+        proxy[key] = valueOrSetterFunc;
       }
-    });
+      return true
+    }catch(err){
+      return false
+    }
   }
 
-  function reset(): void {
-    store = JSON.parse(JSON.stringify(initialState));
+  const _reset = () => {
+
   }
 
-  function del(pathOrFunc: keyof T | ((state: T) => unknown)): void {
-    const key = typeof pathOrFunc === "function" ? "" : pathOrFunc;
-    const path = key.toString().split(".");
-    let obj = store;
-    path.forEach((key, index) => {
-      if (index === path.length - 1) {
-        delete obj[key];
-      } else {
-        obj = obj[key] as T;
-      }
-    });
+  const _del = () => {
+
   }
+
+
+  
+
 
   const proxy = new Proxy(store, {
-    get(target, key) {
-      if (key === "get") return get;
-      if (key === "set") return set;
-      if (key === "reset") return reset;
-      if (key === "delete") return del;
-      if (key === "store") return store;
-      return target[key as string | number];
+    get(target, prop, receiver) {
+      // Return the entire store if 'get' is invoked without arguments
+      logger.get.log({
+        target, prop, receiver
+      })
+
+      if (prop === "get") return _get;
+      if (prop === "set") return _set;
+      if (prop === "reset") return _reset;
+      if (prop === "delete") return _del;
+      // can already get all values in store from 'nst'
+      // maybe this could return verbose store (with setters, listeners, etc.)
+      if (prop === "store") return store; 
+      
+      // return target[prop as string | number];
+
+
+      if (prop === 'undefined') {
+        logger.get.log(`Prop is 'undefined', returning store.`)
+        return target;
+      }
+      
+      if (typeof prop === 'string' && prop.includes('.')) {
+        const parts = prop.split('.');
+        let current: any = target;
+
+        for (let part of parts) {
+          current = current[part];
+        }
+
+        return current;
+      }
+
+      return Reflect.get(target, prop, receiver) as keyof typeof store
     },
-    set(target, key, value) {
-      set(key as keyof T, value);
-      return true;
+    set(target, prop, value, receiver) {
+      const oldValue = Reflect.get(target, prop, receiver);
+      const result = Reflect.set(target, prop, value, receiver);
+
+      if (oldValue !== value) {
+        eventEmitter.emit(prop.toString(), {
+          key: prop.toString(),
+          path: prop.toString(),
+          value: value,
+        });
+      }
+
+      return result;
     },
   });
 
+
   return proxy as NestoreReturn<T>
+
 }
+
+
+
+
+
+
 
 if (typeof window !== "undefined") {
   window.nestore = createNestore;
 }
 
+
+
+
+
 export default createNestore;
 
-//   const nst = createNestore({
-//     greeting:'hello',
-//     user: {
-//         name: 'John',
-//         number: 7
-//     }
-//   })
 
-//   const name = nst.get(s => s.user.name)
+const nst = createNestore({
+  grape: 'flavored'
+})
+
+
+nst.grape
