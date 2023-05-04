@@ -1,4 +1,4 @@
-import type { BaseRecord, NestoreOptions, GetterFunc, SetterFunc, Listener, NestoreReturn } from './types'
+import type { BaseRecord, NestoreOptions, GetterFunc, SetterFunc, Listener, NestoreReturn, MakeDataPropsOptional } from './types'
 import { colors, debug } from './debug';
 import EventEmitter from './event';
 
@@ -17,7 +17,7 @@ function createNestore<T extends BaseRecord>(
   initialState: T = {} as T,
   options: NestoreOptions = {}
 ): NestoreReturn<T> {
-  let store: T = initialState;
+  let store = initialState as Partial<T>;
   let globalDebugNamespace:string = ''
   const eventEmitter = new EventEmitter();
   
@@ -51,22 +51,30 @@ function createNestore<T extends BaseRecord>(
     set: debug('set', globalDebugNamespace),
   }
 
+
+  const internalProps = [
+    'get',
+    'set',
+    'reset',
+    'delete'
+  ]
+
   const _get = <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>): T | keyof T => {
     if(!keyOrGetterFunc){
-      return store //as T
+      return store as T
     }
     if (typeof keyOrGetterFunc === 'function') {
-      return (keyOrGetterFunc as GetterFunc<T>)(proxy);
+      return (keyOrGetterFunc as GetterFunc<T>)(proxy as T);
     }
 
-    return proxy[keyOrGetterFunc] //as T[K]
+    return proxy[keyOrGetterFunc] as T[K]
   }
 
   const _set = <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => {
     try{
 
       if (typeof valueOrSetterFunc === 'function') {
-        proxy[key] = (valueOrSetterFunc as SetterFunc<T>)(proxy);
+        proxy[key] = (valueOrSetterFunc as SetterFunc<T>)(proxy as T);
       } else {
         proxy[key] = valueOrSetterFunc;
       }
@@ -88,7 +96,7 @@ function createNestore<T extends BaseRecord>(
   
 
 
-  const proxy = new Proxy(store, {
+  const proxy = new Proxy<Partial<T>>(store, {
     get(target, prop, receiver) {
       // Return the entire store if 'get' is invoked without arguments
       logger.get.log({
@@ -101,7 +109,7 @@ function createNestore<T extends BaseRecord>(
       if (prop === "delete") return _del;
       // can already get all values in store from 'nst'
       // maybe this could return verbose store (with setters, listeners, etc.)
-      if (prop === "store") return store; 
+      // if (prop === "store") return store; 
       
       // return target[prop as string | number];
 
@@ -137,6 +145,16 @@ function createNestore<T extends BaseRecord>(
       }
 
       return result;
+    },
+    deleteProperty(target, prop) {
+      // Custom delete logic
+      console.log(`Deleting ${String(prop)}`);
+      if(!target) return false
+      if (prop in target) {
+        delete target[prop as string | number];
+        return true;
+      }
+      return false;
     },
   });
 

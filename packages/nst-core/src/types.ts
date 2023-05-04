@@ -5,6 +5,12 @@ declare global {
     }
 }
 
+export type MakeDataPropsOptional<T> = {
+  [K in keyof T]: {
+    [P in keyof T[K]]: Partial<T[K][P]> | undefined;
+  }
+};
+
 export type ProxyObject<T> = {
     [K in keyof T]: T[K] extends Record<string | number, unknown>
         ? ProxyObject<T[K]>
@@ -23,13 +29,12 @@ export type NestoreOptions = {
 //     store: T;
 // }
 export type NestoreReturn<T> = {
-    [K in keyof T]: T[K];
+    [K in keyof T]?: T[K];
   } & {
     get: <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>) => typeof keyOrGetterFunc extends undefined | null ? T[K] : T;
     set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => boolean;
     reset: () => void;
-    delete: () => void;
-    store: T;
+    store: Partial<T>;
   };
 
 export type BaseRecord = {

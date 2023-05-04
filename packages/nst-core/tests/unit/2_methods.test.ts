@@ -40,19 +40,17 @@ describe('PROXY METHODS', function () {
 
   it('C. Provides expected handlers and proxy (delete)', function () {
     const nst = nestore({
-      greetings: "fellow humans"
+      greetings: "fellow humans",
+      count: 5,
     })
 
     expect(nst.greetings).to.eq('fellow humans')
+    expect(nst.count).to.eq(5)
 
     delete nst.greetings
 
     expect(nst.greetings).to.eq(undefined)
-
-    delete nst.store
-
-    expect(nst.store).to.not.eq(undefined)
-
+    expect(nst.count).to.eq(5)
 
 
   });
