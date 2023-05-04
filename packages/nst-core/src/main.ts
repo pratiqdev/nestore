@@ -85,9 +85,7 @@ function createNestore<T extends BaseRecord>(
     }
   }
 
-
-
-  const proxyHandlers = {
+  const proxy = new Proxy<Partial<T>>(store, {
     get(target: Partial<T>, prop: string | symbol, receiver:any) {
       // Return the entire store if 'get' is invoked without arguments
       logger.get.log({
@@ -152,16 +150,7 @@ function createNestore<T extends BaseRecord>(
       }
       return false;
     },
-  }
-
-
-
-
-  
-
-
-  const proxy = new Proxy<Partial<T>>(store, proxyHandlers);
-
+  });
 
   return proxy as NestoreReturn<T>
 
@@ -183,10 +172,10 @@ if (typeof window !== "undefined") {
 
 export default createNestore;
 
-
 const nst = createNestore({
-  grape: 'flavored'
+  grape: 'flavored',
+  number: (arg:any) => arg ? true : false
 })
 
 
-nst.grape
+nst.number
