@@ -1,3 +1,3 @@
 # nestore
 
-Turbo monorepo with Changesets
+Minimize your objective function
