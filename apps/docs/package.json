@@ -1,6 +1,7 @@
 {
   "name": "@pratiq/nestore-docs",
   "version": "0.0.0",
+  "private":true,
   "scripts": {
     "dev": "docusaurus start",
     "start": "docusaurus start",
