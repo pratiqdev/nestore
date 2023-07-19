@@ -107,13 +107,14 @@ importers:
         version: 0.0.9(eslint@7.32.0)
 
   packages/nst-core:
+    dependencies:
+      '@pratiq/nestore-types':
+        specifier: workspace:*
+        version: link:../nst-types
     devDependencies:
       '@pratiq/nestore-config':
         specifier: workspace:*
         version: link:../nst-config
-      '@pratiq/nestore-types':
-        specifier: workspace:*
-        version: link:../nst-types
       '@types/chai':
         specifier: ^4.3.5
         version: 4.3.5
@@ -156,6 +157,9 @@ importers:
       '@pratiq/nestore':
         specifier: workspace:*
         version: link:../nst-core
+      '@pratiq/nestore-types':
+        specifier: workspace:*
+        version: link:../nst-types
     devDependencies:
       '@babel/core':
         specifier: ^7.22.9
@@ -169,9 +173,6 @@ importers:
       '@pratiq/nestore-config':
         specifier: workspace:*
         version: link:../nst-config
-      '@pratiq/nestore-types':
-        specifier: workspace:*
-        version: link:../nst-types
       '@testing-library/jest-dom':
         specifier: ^5.16.5
         version: 5.16.5

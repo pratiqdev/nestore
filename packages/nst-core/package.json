@@ -19,9 +19,11 @@
     "test-node": "node tests/node/test_1",
     "test": "mocha"
   },
+  "dependencies": {
+    "@pratiq/nestore-types": "workspace:*"
+  },
   "devDependencies": {
     "@pratiq/nestore-config": "workspace:*",
-    "@pratiq/nestore-types": "workspace:*",
     "@types/node": "^18.16.3",
     "add": "^2.0.6",
     "eslint": "^7.32.0",
