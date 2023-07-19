@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "private": true,
   "dependencies": {
     "@babel/eslint-plugin": "^7.19.1",
     "eslint-plugin-react": "7.28.0"
