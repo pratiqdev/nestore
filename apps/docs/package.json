@@ -18,7 +18,6 @@
     "@emotion-icons/bootstrap": "^3.27.0",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
-    "@latest": "link:@docusaurus/preset-classic/@latest",
     "@mdx-js/react": "^1.6.22",
     "@pratiq/nestore": "workspace:*",
     "axios": "^1.3.3",
