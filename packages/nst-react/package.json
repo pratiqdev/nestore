@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@pratiq/nestore-config": "workspace:*",
+    "@pratiq/nestore-types": "workspace:*",
     "@types/jest": "^29.5.3",
     "@types/react": "^17.0.13",
     "@types/react-dom": "^17.0.8",

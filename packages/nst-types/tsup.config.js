@@ -3,8 +3,8 @@ import { defineConfig } from 'tsup'
 export default defineConfig((options) => {
   return {
     // minify: !options.watch,
-    entryPoints: ['./src/main.ts'],
-    format: ['cjs', 'esm'],
+    entryPoints: ['./src/types.ts'],
+    format: ['esm'],
     outDir: './dist',
     dts: true,
     // dtsBundle: true,

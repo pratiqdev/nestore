@@ -1,9 +1,8 @@
 {
-  "name": "@pratiq/nestore",
+  "name": "@pratiq/nestore-types",
   "version": "0.0.1",
-  "main": "./dist/main.js",
-  "module": "./dist/main.mjs",
-  "types": "./dist/main.d.ts",
+  "main": "index.js",
+  "types": "./dist/types.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "files": [
@@ -14,14 +13,11 @@
     "build": "tsup",
     "dev": "tsup",
     "//_dev": "tsup src/index.ts --format esm --watch --dts --external react",
-    "lint": "eslint \"src/**/*.ts*\"",
-    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "test-node": "node tests/node/test_1",
-    "test": "mocha"
+    "lint": "eslint \"src/**/*.ts*\""
+
   },
   "devDependencies": {
     "@pratiq/nestore-config": "workspace:*",
-    "@pratiq/nestore-types": "workspace:*",
     "@types/node": "^18.16.3",
     "add": "^2.0.6",
     "eslint": "^7.32.0",
@@ -34,8 +30,5 @@
     "mocha": "^10.2.0",
     "ts-node": "^10.9.1",
     "tsd": "^0.28.1"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

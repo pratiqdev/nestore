@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import createStore from '@pratiq/nestore'
-import { BaseRecord, NestoreOptions, NestoreReturn, StoreInitializer } from './nestore_types'
+import { BaseRecord, NestoreOptions, NestoreReturn, StoreInitializer } from '@pratiq/nestore-types'
 
 type UseNestore = (path:string) => any;
 type UseNestoreListener = (event: string | string[], ...values: any[]) => void;

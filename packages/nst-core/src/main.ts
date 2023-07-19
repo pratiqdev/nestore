@@ -1,4 +1,13 @@
-import type { BaseRecord, NestoreOptions, GetterFunc, SetterFunc, Listener, NestoreReturn, MakeDataPropsOptional, StoreInitializer } from './types'
+import type { 
+  BaseRecord, 
+  NestoreOptions, 
+  GetterFunc, 
+  SetterFunc, 
+  Listener, 
+  NestoreReturn, 
+  MakeDataPropsOptional, 
+  StoreInitializer 
+} from '@pratiq/nestore-types'
 import { colors, debug } from './debug';
 import EventEmitter from './event';
 
@@ -235,7 +244,7 @@ function createNestore<T extends BaseRecord>(
         });
       }
 
-      return result;
+      return result; 
     },
     deleteProperty(target: Partial<T>, prop: string | symbol) {
       // Custom delete logic

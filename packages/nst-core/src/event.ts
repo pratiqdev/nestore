@@ -1,4 +1,4 @@
-import type { Event, Listener, } from './types'
+import type { Event, Listener, } from '@pratiq/nestore-types'
 
 class EventEmitter {
     listeners: Record<Event, Listener[]>;
