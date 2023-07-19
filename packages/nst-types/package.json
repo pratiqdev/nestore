@@ -1,12 +1,11 @@
 {
   "name": "@pratiq/nestore-types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "types": "./dist/types.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "private": true,
-
   "files": [
     "dist/**",
     "README.md"
@@ -16,7 +15,6 @@
     "dev": "tsup",
     "//_dev": "tsup src/index.ts --format esm --watch --dts --external react",
     "lint": "eslint \"src/**/*.ts*\""
-
   },
   "devDependencies": {
     "@pratiq/nestore-config": "workspace:*",

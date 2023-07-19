@@ -1,6 +1,6 @@
 {
   "name": "@pratiq/nestore-config",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -8,7 +8,6 @@
     "@babel/eslint-plugin": "^7.19.1",
     "eslint-plugin-react": "7.28.0"
   },
-
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "eslint-config-next": "^13.2.4",
