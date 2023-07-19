@@ -5,6 +5,8 @@
   "types": "./dist/types.d.ts",
   "sideEffects": false,
   "license": "MIT",
+  "private": true,
+
   "files": [
     "dist/**",
     "README.md"
