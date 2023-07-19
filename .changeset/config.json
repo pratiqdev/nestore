@@ -7,9 +7,6 @@
   "access": "public",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@pratiq/nestore-docs",
-    "@pratiq/nestore-types",
-    "@pratiq/nestore-utils",
-    "@pratiq/nestore-config"
+    "@pratiq/nestore-docs"
   ]
 }
