@@ -11,7 +11,7 @@
     "version-packages": "changeset version",
     "release": "turbo run build --filter=docs^... && changeset publish",
     "serve": "pnpm --filter=docs run serve",
-    "test": "pnpm --filter=nestore-utils --filter=nestore --filter=nestore-react build && pnpm --filter=nestore --filter=nestore-react run test",
+    "test": "turbo run build --filter '!./apps/docs/**' && turbo run test",
 
     "pre":"pnpm install && pnpm run build && clear",
     "test-node":"pnpm run pre && pnpm --filter @pratiq/nestore run test-node"

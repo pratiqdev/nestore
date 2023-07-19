@@ -295,14 +295,15 @@ if (typeof window !== "undefined") {
 
 
 export default createNestore;
-/*
 
+/*
 const nst = createNestore({
   grape: 'flavored',
   number: (arg:any) => arg ? true : false
 })
 
 nst.number
+nst.set({ ayo: '', })
 
 nst.greeting = 'hello' 
 

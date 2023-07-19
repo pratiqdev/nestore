@@ -17,7 +17,7 @@
     "lint": "eslint \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "test-node": "node tests/node/test_1",
-    "test": "clear && npm run build && mocha"
+    "test": "mocha"
   },
   "devDependencies": {
     "@pratiq/nestore-config": "workspace:*",

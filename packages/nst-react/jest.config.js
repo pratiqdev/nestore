@@ -1,4 +1,4 @@
-const esModules = ['@pratiq.hooks', ''].join('|');
+const esModules = ['@pratiq/nestore', ''].join('|');
 
 const config = {
     testRegex: [
