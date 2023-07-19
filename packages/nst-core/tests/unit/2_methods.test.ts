@@ -81,4 +81,18 @@ describe('PROXY METHODS', function () {
 
   });
 
+  it('Cx. Accepts a function as the store initializer', function () {
+    const nst = nestore(({ get }) => ({
+      greetings: "fellow humans",
+      count: 5,
+      getCount: get('count')
+    }))
+
+    expect(nst.greetings).to.eq('fellow humans')
+
+
+
+
+  });
+
 });

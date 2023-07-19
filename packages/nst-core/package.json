@@ -1,9 +1,9 @@
 {
-  "name": "@nestate/core",
+  "name": "@pratiq/nestore",
   "version": "0.0.1",
   "main": "index.js",
   "module": "dist/main.mjs",
-  "types": "dist/index.d.ts",
+  "types": "dist/main.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "files": [
@@ -20,7 +20,7 @@
     "test": "clear && npm run build && mocha"
   },
   "devDependencies": {
-    "@nestate/config": "workspace:*",
+    "@pratiq/nestore-config": "workspace:*",
     "@types/node": "^18.16.3",
     "add": "^2.0.6",
     "eslint": "^7.32.0",

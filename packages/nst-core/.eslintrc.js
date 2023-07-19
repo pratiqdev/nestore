@@ -1,5 +1,5 @@
 // @nestate/core
 module.exports = {
   root: true,
-  extends: ["../nst-config"],
+  extends: ["@pratiq/nestore-config"],
 };

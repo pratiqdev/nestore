@@ -8,17 +8,68 @@ import EventEmitter from './event';
 
 
 
+/*
 
+
+type StoreInitializer<T> = (proxyMethods: ProxyMethods<T>) => T;
+
+interface ProxyMethods<T> {
+    get: (prop: PropertyKey) => any;
+    set: (prop: PropertyKey, value: any) => void;
+}
+
+function createStore<T>(store: T | StoreInitializer<T>) {
+    let initialStore: T = typeof store === 'function' ? {} as T : store;
+
+    let proxyMethods: ProxyMethods<T> = {
+        get: (prop: PropertyKey) => initialStore[prop],
+        set: (prop: PropertyKey, value: any) => {
+            initialStore[prop] = value;
+        }
+    };
+    
+    let proxy = new Proxy(initialStore, {
+        get: (_, prop) => proxyMethods.get(prop),
+        set: (_, prop, value) => {
+            proxyMethods.set(prop, value);
+            return true;
+        }
+    });
+
+    if (typeof store === 'function') {
+        initialStore = (store as StoreInitializer<T>)(proxyMethods);
+        // Optionally, you can update proxy with new initialStore here.
+    }
+
+    return proxy;
+}
+
+// Usage
+const myStore = createStore(({ get, set }) => ({
+    myKey: 'hello',
+    myFunc: (newKey: string) => set('myKey', newKey),
+}));
+
+*/
+type StoreInitializer<T extends object> = (proxyMethods: {
+  get: <K extends keyof T> (keyOrGetterFunc ?: string | T[K] | GetterFunc<T>) => T | keyof T,
+  set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => boolean
+}) => T;
+
+interface ProxyMethods<T> {
+  get: (prop: PropertyKey) => any;
+  set: (prop: PropertyKey, value: any) => void;
+}
 
 
 
 //&                                                                                                 
 function createNestore<T extends BaseRecord>(
-  initialState: T = {} as T,
+  initialState: T | StoreInitializer<T> = {} as T,
   options: NestoreOptions = {}
 ): NestoreReturn<T> {
-  let store = JSON.parse(JSON.stringify(initialState)) as Partial<T>;
-  let originalStore = JSON.parse(JSON.stringify(initialState)) as Partial<T>;
+  let store = typeof initialState === 'function' ? {} as T : JSON.parse(JSON.stringify(initialState)) as Partial<T>;
+  let originalStore = typeof initialState === 'function' ? {} as T : JSON.parse(JSON.stringify(initialState)) as Partial<T>;
   let globalDebugNamespace:string = ''
   const eventEmitter = new EventEmitter();
   
@@ -85,8 +136,8 @@ function createNestore<T extends BaseRecord>(
     }
   }
 
-  const proxy = new Proxy<Partial<T>>(store, {
-    get(target: Partial<T>, prop: string | symbol, receiver:any) {
+  const proxyMethods = {
+    get(target: Partial<T>, prop: string | symbol, receiver: any) {
       // Return the entire store if 'get' is invoked without arguments
       logger.get.log({
         target, prop, receiver
@@ -103,7 +154,7 @@ function createNestore<T extends BaseRecord>(
       // can already get all values in store from 'nst'
       // maybe this could return verbose store (with setters, listeners, etc.)
       // if (prop === "store") return store; 
-      
+
       // return target[prop as string | number];
 
 
@@ -111,7 +162,7 @@ function createNestore<T extends BaseRecord>(
         logger.get.log(`Prop is 'undefined', returning store.`)
         return target;
       }
-      
+
       if (typeof prop === 'string' && prop.includes('.')) {
         const parts = prop.split('.');
         let current: any = target;
@@ -143,14 +194,21 @@ function createNestore<T extends BaseRecord>(
       // Custom delete logic
       let propString = String(prop)
       console.log(`Deleting ${propString}`);
-      if(!target || internalProps.includes(propString)) return false
+      if (!target || internalProps.includes(propString)) return false
       if (prop in target) {
         delete target[propString];
         return true;
       }
       return false;
     },
-  });
+  }
+
+  if (typeof store === 'function') {
+    store = (store as StoreInitializer<T>)({ get: _get, set: _set });
+    // Optionally, you can update proxy with new initialStore here.
+  }
+
+  const proxy = new Proxy<Partial<T>>(store, proxyMethods);
 
   return proxy as NestoreReturn<T>
 

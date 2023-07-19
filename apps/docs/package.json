@@ -1,5 +1,5 @@
 {
-  "name": "@nestate/docs",
+  "name": "@pratiq/nestore-docs",
   "version": "0.0.0",
   "scripts": {
     "dev": "docusaurus start",
@@ -20,7 +20,7 @@
     "@emotion/styled": "^11.10.5",
     "@latest": "link:@docusaurus/preset-classic/@latest",
     "@mdx-js/react": "^1.6.22",
-    "@nestate/core": "workspace:*",
+    "@pratiq/nestore": "workspace:*",
     "axios": "^1.3.3",
     "clsx": "^1.2.1",
     "emotion-icons": "^3.27.0",

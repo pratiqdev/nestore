@@ -1,5 +1,5 @@
 // @nestate/utils
 module.exports = {
   root: true,
-  extends: ["nestate"],
+  extends: ["@pratiq/nestore-config"],
 };
