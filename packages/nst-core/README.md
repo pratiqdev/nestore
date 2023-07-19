@@ -1,1 +1,1 @@
-# @nestate/core
+# @pratiq/nestore

@@ -1,8 +1,8 @@
-import createNestate from '@nestate/core'
+import createStore from '@pratiq/nestore'
 
 const createNestateHook = (initialStore: any) => {
 
-    const nst = createNestate()
+    const nst = createStore()
 
     const useNestateHook = (path:string) => {
         return path
@@ -16,4 +16,3 @@ export default createNestateHook
 
 // TODO - create an org on github to match the new nestate org on npm
 // and publish this repo
-

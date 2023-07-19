@@ -1,5 +1,5 @@
-// @nestate/react
+// @pratiq/nestore-react
 module.exports = {
   root: true,
-  extends: ["@pratiq/nestore-config"],
+  extends: ["./node_modules/@pratiq/nestore-config"],
 };

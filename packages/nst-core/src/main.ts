@@ -1,4 +1,4 @@
-import type { BaseRecord, NestoreOptions, GetterFunc, SetterFunc, Listener, NestoreReturn, MakeDataPropsOptional } from './types'
+import type { BaseRecord, NestoreOptions, GetterFunc, SetterFunc, Listener, NestoreReturn, MakeDataPropsOptional, StoreInitializer } from './types'
 import { colors, debug } from './debug';
 import EventEmitter from './event';
 
@@ -50,16 +50,58 @@ const myStore = createStore(({ get, set }) => ({
     myFunc: (newKey: string) => set('myKey', newKey),
 }));
 
-*/
-type StoreInitializer<T extends object> = (proxyMethods: {
+
+
+What will be the result of this code?
+Will updating the initialStore affect the state/values of the proxy?
+```
+const initialStore = { number: 1 }
+
+let proxyMethods = {
+    get: (prop: PropertyKey) => initialStore[prop],
+    set: (prop: PropertyKey, value: any) => {
+        initialStore[prop] = value;
+    }
+};
+    
+let proxy = new Proxy(initialStore, {
+    get: (_, prop) => proxyMethods.get(prop),
+    set: (_, prop, value) => {
+        proxyMethods.set(prop, value);
+        return true;
+    }
+});
+
+initialStore.number = 2
+
+console.log(proxy.get('number'))
+```
+type BasicProxyMethods = {
   get: <K extends keyof T> (keyOrGetterFunc ?: string | T[K] | GetterFunc<T>) => T | keyof T,
   set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => boolean
-}) => T;
-
-interface ProxyMethods<T> {
-  get: (prop: PropertyKey) => any;
-  set: (prop: PropertyKey, value: any) => void;
 }
+*/
+
+
+// export type StateGetter<T> = {
+//   <K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
+// };
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
 
 
 
@@ -111,6 +153,10 @@ function createNestore<T extends BaseRecord>(
     'delete'
   ]
 
+  //& create proxy handlers                                                                                             
+  //$ that accept key/values or setter/getter functions
+  // this is meant to replicate the DX of react SetStateActions
+  // the handler methods should also return accurate types
   const _get = <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>): T | keyof T => {
     if(!keyOrGetterFunc){
       return store as T
@@ -136,7 +182,8 @@ function createNestore<T extends BaseRecord>(
     }
   }
 
-  const proxyMethods = {
+
+  const proxyHandlers = {
     get(target: Partial<T>, prop: string | symbol, receiver: any) {
       // Return the entire store if 'get' is invoked without arguments
       logger.get.log({
@@ -203,12 +250,31 @@ function createNestore<T extends BaseRecord>(
     },
   }
 
-  if (typeof store === 'function') {
-    store = (store as StoreInitializer<T>)({ get: _get, set: _set });
+  
+  //& create the proxy object                                                                                           
+  //$ using the initial store and proxy handlers
+  // using a proxy allows for easy access to and modification
+  // of the internal properties of an object
+  const proxy = new Proxy<Partial<T>>(store, proxyHandlers);
+
+
+  //& Invoke the store initializer if exist                                                                             
+  // If an initializer function was used to create the store:
+  // invoke the store with the proxy - which stores a reference to the 
+  // target and its attributes - so will update when the target updates
+  if (typeof initialState === 'function') {
+    logger.init.log('Store initializer provided:', { store, proxy })
+    let newStore = (initialState as StoreInitializer<T>)(proxy)
+    // must maintain the reference of the store
+    // the initializer will return a new object that must be
+    // merged with the target store
+    Object.assign(store, newStore)
+    logger.init.log('Initializer invoked.. result:', { store, proxy })
     // Optionally, you can update proxy with new initialStore here.
   }
 
-  const proxy = new Proxy<Partial<T>>(store, proxyMethods);
+
+  
 
   return proxy as NestoreReturn<T>
 
@@ -229,11 +295,33 @@ if (typeof window !== "undefined") {
 
 
 export default createNestore;
+/*
 
 const nst = createNestore({
   grape: 'flavored',
   number: (arg:any) => arg ? true : false
 })
 
-
 nst.number
+
+nst.greeting = 'hello' 
+
+
+// nst.number = 7 
+
+
+
+let store = {}
+
+let initialState = (self) => ({
+  greeting: 'hello',
+  getGreeting: self.greeting
+})
+
+const proxy = new Proxy(store, proxyHandlers);
+
+store = initialState(proxy);
+
+proxy.getGreeting // undefined
+
+*/

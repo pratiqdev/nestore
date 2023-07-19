@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import assert from 'tsd'
-import nestore from '../../src/main'
+import nestore from '../../dist/main.js'
 
 describe('PROXY METHODS', function () {
 
@@ -82,13 +82,20 @@ describe('PROXY METHODS', function () {
   });
 
   it('Cx. Accepts a function as the store initializer', function () {
-    const nst = nestore(({ get }) => ({
+    const nst = nestore((self) => ({
       greetings: "fellow humans",
-      count: 5,
-      getCount: get('count')
-    }))
+      count: 2,
+      get_a: () => self.greetings,
+      get_b: () => self.count,
+      get_self: () => self
+    }), {
+      debug: false
+    })
 
-    expect(nst.greetings).to.eq('fellow humans')
+    expect(nst.count).to.eq(2)
+    expect(nst.get_a()).to.eq('fellow humans')
+    expect(nst.get_b()).to.eq(2)
+    expect(nst.get_self()).haveOwnPropertyDescriptor('count')
 
 
 

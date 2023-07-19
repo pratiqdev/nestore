@@ -1,4 +1,3 @@
-
 declare global {
     interface Window {
       nestore?: () => unknown;
@@ -18,16 +17,16 @@ export type ProxyObject<T> = {
 };
 
 export type NestoreOptions = {
-    debug?: boolean;
+  /** Enable internal debugging of state and methods.  
+   * Has same effect as setting env variable `DEBUG=@nst`
+   */
+  debug?: boolean;
 }
 
-// export type NestoreReturn<T> = ProxyObject<T> & {
-//     get<K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
-//     set(pathOrFunc: keyof T | ((state: T) => T), value?: unknown): void;
-//     reset(): void;
-//     delete<K extends keyof T>(pathOrFunc: K | ((state: T) => unknown)): void;
-//     store: T;
-// }
+
+// extend the nestore return with any props
+export type AnyRecordProps = { [prop: string]: any; }
+
 export type NestoreReturn<T> = {
     [K in keyof T]?: T[K];
   } & {
@@ -35,7 +34,7 @@ export type NestoreReturn<T> = {
     set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => boolean;
     reset: () => void;
     store: Partial<T>;
-  };
+  } & AnyRecordProps
 
 export type BaseRecord = {
     [key: string]: any;
@@ -47,20 +46,19 @@ export type BaseRecord = {
 
   
   
+export type StoreInitializer<T extends object> = (proxyRef: Partial<T>) => T;
   
   
   
   
   
-  
-  
+
   
   
   
   
 // Define the state manager types
 export type Store = Record<string, any>;
-export type Options = Record<string, any>;
 export type GetterFunc<T> = (store: T) => any;
 export type SetterFunc<T> = (store: T) => any;
 

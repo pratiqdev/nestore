@@ -1,10 +1,10 @@
 const { expect} = require('chai')
-const nestore = require('../../index.js')
+const nestore = require('../../index')
 
 describe('nestore setup', function () {
 
   it('Provides a function as the default export', function () {
-      console.log(nestore)
+      console.log('>>> NESTORE:', nestore)
       const nst = nestore({
         greetings: "fellow humans"
       })

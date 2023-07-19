@@ -1,5 +1,5 @@
 console.log('>><<')
 
-const mainFunc = require('@nestate/core')
+const mainFunc = require('@pratiq/nestore')
 
 console.log(mainFunc)

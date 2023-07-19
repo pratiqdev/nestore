@@ -11,13 +11,13 @@
     "version-packages": "changeset version",
     "release": "turbo run build --filter=docs^... && changeset publish",
     "serve": "pnpm --filter=docs run serve",
-    "test": "pnpm --filter=core run test",
+    "test": "pnpm --filter=nestore-utils --filter=nestore --filter=nestore-react build && pnpm --filter=nestore --filter=nestore-react run test",
 
     "pre":"pnpm install && pnpm run build && clear",
-    "test-node":"pnpm run pre && pnpm --filter @nestate/core run test-node"
+    "test-node":"pnpm run pre && pnpm --filter @pratiq/nestore run test-node"
   },
   "devDependencies": {
-    "@nestate/config": "workspace:*",
+    "@pratiq/nestore-config": "workspace:*",
     "@changesets/cli": "^2.22.0",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",

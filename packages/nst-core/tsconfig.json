@@ -1,5 +1,5 @@
 {
-  "extends": "@nestate/config/core.json",
+  "extends": "./node_modules/@pratiq/nestore-config/core.json",
   "include": [".", "../../_deprecated/main.bk.ts"],
   "exclude": ["dist", "build", "node_modules"]
 }

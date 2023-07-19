@@ -1,9 +1,9 @@
 {
   "name": "@pratiq/nestore",
   "version": "0.0.1",
-  "main": "index.js",
-  "module": "dist/main.mjs",
-  "types": "dist/main.d.ts",
+  "main": "./dist/main.js",
+  "module": "./dist/main.mjs",
+  "types": "./dist/main.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "files": [
