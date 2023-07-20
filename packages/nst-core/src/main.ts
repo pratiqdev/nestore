@@ -8,7 +8,7 @@ import type {
   MakeDataPropsOptional, 
   StoreInitializer 
 } from '@pratiq/nestore-types'
-import { colors, debug } from './debug';
+import { colors, debug } from './debug'; 
 import EventEmitter from './event';
 
 
