@@ -1,5 +1,4 @@
 spec:
-  - "./tests/unit/*.test.js"
   - "./tests/unit/*.test.ts"
 require:
   - ts-node/register

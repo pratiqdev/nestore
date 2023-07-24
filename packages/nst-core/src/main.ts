@@ -13,107 +13,6 @@ import EventEmitter from './event';
 
 
 
-
-
-
-
-/*
-
-
-type StoreInitializer<T> = (proxyMethods: ProxyMethods<T>) => T;
-
-interface ProxyMethods<T> {
-    get: (prop: PropertyKey) => any;
-    set: (prop: PropertyKey, value: any) => void;
-}
-
-function createStore<T>(store: T | StoreInitializer<T>) {
-    let initialStore: T = typeof store === 'function' ? {} as T : store;
-
-    let proxyMethods: ProxyMethods<T> = {
-        get: (prop: PropertyKey) => initialStore[prop],
-        set: (prop: PropertyKey, value: any) => {
-            initialStore[prop] = value;
-        }
-    };
-    
-    let proxy = new Proxy(initialStore, {
-        get: (_, prop) => proxyMethods.get(prop),
-        set: (_, prop, value) => {
-            proxyMethods.set(prop, value);
-            return true;
-        }
-    });
-
-    if (typeof store === 'function') {
-        initialStore = (store as StoreInitializer<T>)(proxyMethods);
-        // Optionally, you can update proxy with new initialStore here.
-    }
-
-    return proxy;
-}
-
-// Usage
-const myStore = createStore(({ get, set }) => ({
-    myKey: 'hello',
-    myFunc: (newKey: string) => set('myKey', newKey),
-}));
-
-
-
-What will be the result of this code?
-Will updating the initialStore affect the state/values of the proxy?
-```
-const initialStore = { number: 1 }
-
-let proxyMethods = {
-    get: (prop: PropertyKey) => initialStore[prop],
-    set: (prop: PropertyKey, value: any) => {
-        initialStore[prop] = value;
-    }
-};
-    
-let proxy = new Proxy(initialStore, {
-    get: (_, prop) => proxyMethods.get(prop),
-    set: (_, prop, value) => {
-        proxyMethods.set(prop, value);
-        return true;
-    }
-});
-
-initialStore.number = 2
-
-console.log(proxy.get('number'))
-```
-type BasicProxyMethods = {
-  get: <K extends keyof T> (keyOrGetterFunc ?: string | T[K] | GetterFunc<T>) => T | keyof T,
-  set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => boolean
-}
-*/
-
-
-// export type StateGetter<T> = {
-//   <K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
-// };
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-
-
-
-
 //&                                                                                                 
 function createNestore<T extends BaseRecord>(
   initialState: T | StoreInitializer<T> = {} as T,
@@ -124,12 +23,6 @@ function createNestore<T extends BaseRecord>(
   let globalDebugNamespace:string = ''
   const eventEmitter = new EventEmitter();
   
-  //+ need to parse mutators and listeners before de-ref
-  // try {
-  //   store = JSON.parse(JSON.stringify(initialState));
-  // } catch (err) {
-  //   throw new Error(`Nestore: failed to parse 'initialStore'`);
-  // }
 
 
   //&                                                                          
@@ -168,20 +61,19 @@ function createNestore<T extends BaseRecord>(
   // the handler methods should also return accurate types
   const _get = <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>): T | keyof T => {
     if(!keyOrGetterFunc){
-      return store as T
+      return store as unknown as T
     }
     if (typeof keyOrGetterFunc === 'function') {
-      return (keyOrGetterFunc as GetterFunc<T>)(proxy as T);
+      return (keyOrGetterFunc as GetterFunc<T>)(proxy);
     }
 
     return proxy[keyOrGetterFunc] as T[K]
   }
 
-  const _set = <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => {
+  const _set = <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T, K>) => {
     try{
-
       if (typeof valueOrSetterFunc === 'function') {
-        proxy[key] = (valueOrSetterFunc as SetterFunc<T>)(proxy as T);
+        proxy[key] = (valueOrSetterFunc as SetterFunc<T, K>)(proxy);
       } else {
         proxy[key] = valueOrSetterFunc;
       }
@@ -230,7 +122,11 @@ function createNestore<T extends BaseRecord>(
         return current;
       }
 
-      return Reflect.get(target, prop, receiver) as keyof typeof store
+      if(typeof prop === 'string') {
+        return Reflect.get(target, prop, receiver) as T[typeof prop]
+      }
+
+      // return Reflect.get(target, prop, receiver) as T[typeof prop]
     },
     set(target: Partial<T>, prop: string | symbol, value: any, receiver: any) {
       const oldValue = Reflect.get(target, prop, receiver);
@@ -296,7 +192,7 @@ function createNestore<T extends BaseRecord>(
 
 
 if (typeof window !== "undefined") {
-  window.nestore = createNestore;
+  (window as any).nestore = createNestore;
 }
 
 
@@ -304,34 +200,3 @@ if (typeof window !== "undefined") {
 
 
 export default createNestore;
-
-/*
-const nst = createNestore({
-  grape: 'flavored',
-  number: (arg:any) => arg ? true : false
-})
-
-nst.number
-nst.set({ ayo: '', })
-
-nst.greeting = 'hello' 
-
-
-// nst.number = 7 
-
-
-
-let store = {}
-
-let initialState = (self) => ({
-  greeting: 'hello',
-  getGreeting: self.greeting
-})
-
-const proxy = new Proxy(store, proxyHandlers);
-
-store = initialState(proxy);
-
-proxy.getGreeting // undefined
-
-*/

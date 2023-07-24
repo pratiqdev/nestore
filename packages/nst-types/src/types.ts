@@ -31,7 +31,7 @@ export type NestoreReturn<T> = {
     [K in keyof T]?: T[K];
   } & {
     get: <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>) => typeof keyOrGetterFunc extends undefined | null ? T[K] : T;
-    set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T>) => boolean;
+    set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T, K>) => boolean;
     reset: () => void;
     store: Partial<T>;
   } & AnyRecordProps
@@ -40,27 +40,16 @@ export type BaseRecord = {
     [key: string]: any;
   };
 
-// export type StateGetter<T> = {
-//   <K extends keyof T>(pathOrFunc: K | ((state: T) => T[K])): T[K];
-// };
 
-  
   
 export type StoreInitializer<T extends object> = (proxyRef: Partial<T>) => T;
   
-  
-  
-  
-  
 
-  
-  
-  
   
 // Define the state manager types
 export type Store = Record<string, any>;
-export type GetterFunc<T> = (store: T) => any;
-export type SetterFunc<T> = (store: T) => any;
+export type GetterFunc<T> = (store: Partial<T>) => T;
+export type SetterFunc<T, K extends keyof T> = (store: Partial<T>) => T[K] | undefined;
 
 // Define the event emitter types
 export type Listener = (event: any) => void;
