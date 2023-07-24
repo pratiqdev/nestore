@@ -8,7 +8,7 @@ type UseNestoreListener = (event: string | string[], ...values: any[]) => void;
 
 
 
-const createNestateHook = <T extends BaseRecord>(
+const createNestateHook = <T extends BaseRecord, U extends T>(
     initialStore: T | StoreInitializer<T> = {} as T, 
     options: NestoreOptions = {}
 ): UseNestore => {

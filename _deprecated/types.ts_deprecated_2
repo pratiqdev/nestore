@@ -27,6 +27,24 @@ export type NestoreOptions = {
 // extend the nestore return with any props
 export type AnyRecordProps = { [prop: string]: any; }
 
+// export type NestoreReturn<T> = {
+//     [K in keyof T]?: T[K];
+//   } & {
+//     get: <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>) => typeof keyOrGetterFunc extends undefined | null ? T[K] : T;
+//     set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T, K>) => boolean;
+//     reset: () => void;
+//     store: Partial<T>;
+//   } & AnyRecordProps
+
+
+// export type NestoreReturn<T> = {
+//   [K in keyof T]?: T[K];
+// } & {
+//   get: <K extends keyof T>(keyOrGetterFunc?: string | ((store: T) => T[K])) => typeof keyOrGetterFunc extends string ? T[K] : T;
+//   set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | ((store: T) => T[K] | undefined)) => boolean;
+//   reset: () => void;
+//   store: Partial<T>;
+// } & AnyRecordProps
 
 
 export type NestoreReturn<T extends object> = {

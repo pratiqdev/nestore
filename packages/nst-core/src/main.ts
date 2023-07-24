@@ -10,6 +10,7 @@ import type {
 } from '@pratiq/nestore-types'
 import { colors, debug } from './debug'; 
 import EventEmitter from './event';
+import tinyId from './tinyId';
 
 
 
@@ -17,7 +18,7 @@ import EventEmitter from './event';
 function createNestore<T extends BaseRecord>(
   initialState: T | StoreInitializer<T> = {} as T,
   options: NestoreOptions = {}
-): NestoreReturn<T> {
+): NestoreReturn<T & typeof initialState> {
   let store = typeof initialState === 'function' ? {} as T : JSON.parse(JSON.stringify(initialState)) as Partial<T>;
   let originalStore = typeof initialState === 'function' ? {} as T : JSON.parse(JSON.stringify(initialState)) as Partial<T>;
   let globalDebugNamespace:string = ''
@@ -43,9 +44,12 @@ function createNestore<T extends BaseRecord>(
   
   const logger = {
     init: debug('init', globalDebugNamespace),
+    method: debug('method', globalDebugNamespace),
     get: debug('get', globalDebugNamespace),
     set: debug('set', globalDebugNamespace),
+    action: debug('action', globalDebugNamespace),
   }
+  
 
 
   const internalProps = [
@@ -55,11 +59,12 @@ function createNestore<T extends BaseRecord>(
     'delete'
   ]
 
-  //& create proxy handlers                                                                                             
+  //& create custom getter and setter functions                                                                         
   //$ that accept key/values or setter/getter functions
   // this is meant to replicate the DX of react SetStateActions
   // the handler methods should also return accurate types
   const _get = <K extends keyof T>(keyOrGetterFunc?: string | T[K] | GetterFunc<T>): T | keyof T => {
+    logger.method.log('', keyOrGetterFunc)
     if(!keyOrGetterFunc){
       return store as unknown as T
     }
@@ -83,84 +88,205 @@ function createNestore<T extends BaseRecord>(
     }
   }
 
+  const _reset = (target: Partial<T>) => {
+    Object.keys(target).forEach(key => {
+      delete target[key];
+    });
+    Object.assign(target, originalStore);
+  };
 
-  const proxyHandlers = {
-    get(target: Partial<T>, prop: string | symbol, receiver: any) {
-      // Return the entire store if 'get' is invoked without arguments
-      logger.get.log({
-        target, prop, receiver
-      })
-
-      if (prop === "get") return _get;
-      if (prop === "set") return _set;
-      if (prop === "reset") return () => {
-        Object.keys(target).forEach(key => {
-          delete target[key];
-        });
-        Object.assign(target, originalStore);
-      };
-      // can already get all values in store from 'nst'
-      // maybe this could return verbose store (with setters, listeners, etc.)
-      // if (prop === "store") return store; 
-
-      // return target[prop as string | number];
-
-
-      if (prop === 'undefined') {
-        logger.get.log(`Prop is 'undefined', returning store.`)
-        return target;
-      }
-
-      if (typeof prop === 'string' && prop.includes('.')) {
-        const parts = prop.split('.');
-        let current: any = target;
-
-        for (let part of parts) {
-          current = current[part];
-        }
-
-        return current;
-      }
-
-      if(typeof prop === 'string') {
-        return Reflect.get(target, prop, receiver) as T[typeof prop]
-      }
-
-      // return Reflect.get(target, prop, receiver) as T[typeof prop]
-    },
-    set(target: Partial<T>, prop: string | symbol, value: any, receiver: any) {
-      const oldValue = Reflect.get(target, prop, receiver);
-      const result = Reflect.set(target, prop, value, receiver);
-
-      if (oldValue !== value) {
-        eventEmitter.emit(prop.toString(), {
-          key: prop.toString(),
-          path: prop.toString(),
-          value: value,
-        });
-      }
-
-      return result; 
-    },
-    deleteProperty(target: Partial<T>, prop: string | symbol) {
-      // Custom delete logic
-      let propString = String(prop)
-      console.log(`Deleting ${propString}`);
-      if (!target || internalProps.includes(propString)) return false
-      if (prop in target) {
-        delete target[propString];
-        return true;
-      }
-      return false;
-    },
+  const proxy_apply = (target: Partial<T> | Function, thisArg:any, argumentsList: any[]) => {
+    console.log('>>>>>>>>>>>> Proxy - apply:', target, thisArg, argumentsList)
+    if(typeof target !== 'function'){
+      console.log('NON FUNCTION TARGET PASSED TO PROXY APPLY METHOD')
+      return;
+    }
+    let actionId = tinyId(4)
+    // Custom logic before function call
+    const result = target.apply(thisArg, argumentsList); // Call the original function
+    // Custom logic after function call
+    logger.action.log({ action: 'modifier', actionId, result, target, argumentsList })
+    return result; // Return the result of the function call (optional)
   }
+
+  const proxy_get = (target: Partial<T>, prop: string | symbol, receiver: any) => {
+    // Return the entire store if 'get' is invoked without arguments
+    let actionId = tinyId(4)
+    logger.action.log({ action: 'get', actionId, prop, target })
+    let returnable:any
+
+
+    if (prop === 'undefined') {
+      logger.get.log(`Prop is 'undefined', returning store.`)
+
+      returnable = target;
+      // return target;
+      return;
+    }
+
+    // handle custom get and set function invocation
+    else if (prop === "get") {
+      returnable = _get;
+      // return _get;
+    }
+    else if (prop === "set") {
+      returnable = _set;
+      // return _set;
+    }
+    else if (prop === "reset") {
+      returnable = _reset;
+    }
+    // can already get all values in store from 'nst'
+    // maybe this could return verbose store (with setters, listeners, etc.)
+    // if (prop === "store") return store; 
+
+    // return target[prop as string | number];
+
+
+
+    else if (typeof prop === 'string' && prop.includes('.')) {
+      const parts = prop.split('.');
+      let current: any = target;
+
+      for (let part of parts) {
+        current = current[part];
+      }
+
+      returnable = current;
+      // return current;
+    }
+
+    else if(typeof prop === 'string') {
+      // return Reflect.get(target, prop, receiver) as T[typeof prop]
+      returnable = Reflect.get(target, prop, receiver) as T[typeof prop]
+    }
+
+    if(typeof returnable === 'function'){
+      return function (...args:any[]) {
+        console.log('>>> its a function?? this is middleware????')
+        let res = (returnable as Function).apply(receiver, args)
+        console.log('>>>> we did it! here is the result:', res)
+        return res
+      }
+    }
+
+    return returnable
+
+    // return Reflect.get(target, prop, receiver) as T[typeof prop]
+  }
+
+  const proxy_set = (target: Partial<T>, prop: string | symbol, value: any, receiver: any) => {
+    let actionId = tinyId(4)
+    
+    const oldValue = Reflect.get(target, prop, receiver);
+    const result = Reflect.set(target, prop, value, receiver);
+    
+    if (oldValue !== value) {
+      eventEmitter.emit(prop.toString(), {
+        key: prop.toString(),
+        path: prop.toString(),
+        value: value,
+      });
+    }
+    
+    logger.action.log({ action: 'set', actionId, prop, value, oldValue, result, target })
+    return result; 
+  }
+
+  const proxy_delete = (target: Partial<T>, prop: string | symbol) => {
+    // Custom delete logic
+    let actionId = tinyId(4)
+    const oldValue = Reflect.get(target, prop);
+    const result = Reflect.deleteProperty(target, prop);
+    logger.action.log({ action: 'delete', actionId, prop, oldValue, result, target })
+    return result
+  }
+
+
+  // const proxyHandlers = {
+
+
+  //   get(target: Partial<T>, prop: string | symbol, receiver: any) {
+  //     // Return the entire store if 'get' is invoked without arguments
+  //     logger.get.log({
+  //       target, prop, receiver
+  //     })
+
+  //     if (prop === "get") return _get;
+  //     if (prop === "set") return _set;
+  //     if (prop === "reset") return () => {
+  //       Object.keys(target).forEach(key => {
+  //         delete target[key];
+  //       });
+  //       Object.assign(target, originalStore);
+  //     };
+  //     // can already get all values in store from 'nst'
+  //     // maybe this could return verbose store (with setters, listeners, etc.)
+  //     // if (prop === "store") return store; 
+
+  //     // return target[prop as string | number];
+
+
+  //     if (prop === 'undefined') {
+  //       logger.get.log(`Prop is 'undefined', returning store.`)
+  //       return target;
+  //     }
+
+  //     if (typeof prop === 'string' && prop.includes('.')) {
+  //       const parts = prop.split('.');
+  //       let current: any = target;
+
+  //       for (let part of parts) {
+  //         current = current[part];
+  //       }
+
+  //       return current;
+  //     }
+
+  //     if(typeof prop === 'string') {
+  //       return Reflect.get(target, prop, receiver) as T[typeof prop]
+  //     }
+
+  //     // return Reflect.get(target, prop, receiver) as T[typeof prop]
+  //   },
+  //   set(target: Partial<T>, prop: string | symbol, value: any, receiver: any) {
+  //     const oldValue = Reflect.get(target, prop, receiver);
+  //     const result = Reflect.set(target, prop, value, receiver);
+
+  //     if (oldValue !== value) {
+  //       eventEmitter.emit(prop.toString(), {
+  //         key: prop.toString(),
+  //         path: prop.toString(),
+  //         value: value,
+  //       });
+  //     }
+
+  //     return result; 
+  //   },
+  //   deleteProperty(target: Partial<T>, prop: string | symbol) {
+  //     // Custom delete logic
+  //     let propString = String(prop)
+  //     console.log(`Deleting ${propString}`);
+  //     if (!target || internalProps.includes(propString)) return false
+  //     if (prop in target) {
+  //       delete target[propString];
+  //       return true;
+  //     }
+  //     return false;
+  //   },
+  // }
 
   
   //& create the proxy object                                                                                           
   //$ using the initial store and proxy handlers
   // using a proxy allows for easy access to and modification
   // of the internal properties of an object
-  const proxy = new Proxy<Partial<T>>(store, proxyHandlers);
+  const proxy = new Proxy<Partial<T>>(store, {
+    apply: proxy_apply,
+    get: proxy_get,
+    set: proxy_set,
+    deleteProperty: proxy_delete
+  });
 
 
   //& Invoke the store initializer if exist                                                                             
