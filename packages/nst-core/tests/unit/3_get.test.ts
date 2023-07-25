@@ -1,8 +1,21 @@
 import { expect } from 'chai'
 import nestore from '../../dist/main.js'
 import { beforeEach } from 'mocha';
+type Store = {
+  count: number;
+  greetings: string;
+  invoked?: string;
+  nested: {
+    properties:{
+      are: Array<string>,
+      willBe: Record<string, boolean>
+    }
+  },
+  invokeMe: (arg1:any, arg2:string) => number
+}
 
-let nst = nestore((self) => ({
+let nst = nestore<Store>((self) => ({
+  count: 2,
   greetings: "fellow humans",
   nested: {
     properties:{
@@ -14,6 +27,11 @@ let nst = nestore((self) => ({
       }
     }
   },
+  invokeMe: (arg1:any, arg2:string) => {
+    console.log({arg1, arg2})
+    self.invoked = 'hell yeah' // Property 'invoked' does not exist on type 'Partial<Store>'.ts(2339)
+    return 5
+  }
 }));
 
 
@@ -67,9 +85,9 @@ describe('NESTORE: nst.get', function () {
     expect(nst.greetings).to.be.undefined
   });
 
-  it('4. direct access via proxy `apply` trap', function () {
+  it('4. modifier access', function () {
     expect(nst.invoked).to.be.undefined
-    nst.invokeMe('ohhh', 'kayy')
+    nst.invokeMe?.('ohhh', 'kayy')
     expect(nst.invoked).eq('hell yeah')
   });
 

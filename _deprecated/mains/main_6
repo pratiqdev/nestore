@@ -1,0 +1,23 @@
+// export type ProxyObject<T> = {
+//     [K in keyof T]: T[K] extends (...args: any[]) => any 
+//     ? (...args: Parameters<T[K]>) => ReturnType<T[K]> 
+//     : T[K] extends Record<string | number, unknown> 
+//     ? ProxyObject<T[K]> 
+//     : T[K];
+// };
+
+// type StoreFunction<T> = (proxy: ProxyObject<T>) => T;
+
+// function createStore<T extends Record<string | number, any>>(initialState: StoreFunction<T>): ProxyObject<T> {
+//     const proxy: T = new Proxy({} as T, {});
+//     const state = initialState(proxy);
+//     return new Proxy(state, {}) as ProxyObject<T>;
+// }
+
+// const store = createStore((self) => ({
+//     greetings: 'hello',
+//     location: 'world',
+//     ayo: () => self.greetings + ', ' + self.location,
+// }));
+
+// store.greetings // ts says this is of type 'any'
