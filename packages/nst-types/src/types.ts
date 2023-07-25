@@ -54,7 +54,7 @@ export type BaseRecord = {
 
 
   
-export type StoreInitializer<T extends BaseRecord> = (proxyRef: T) => T;
+export type DEPRECATED__StoreInitializer<T extends BaseRecord> = (proxyRef: T) => T;
   
-
-  
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export type StoreInitializer<T> = (self:Partial<T>) => Partial<T>

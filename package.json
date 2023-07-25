@@ -1,6 +1,6 @@
 {
   "private": true,
-  "type":"module",
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run build && pnpm run serve",
@@ -12,16 +12,18 @@
     "release": "turbo run build --filter=docs^... && changeset publish",
     "serve": "pnpm --filter=docs run serve",
     "test": "turbo run build --filter '!./apps/docs/**' && turbo run test",
-
-    "pre":"pnpm install && pnpm run build && clear",
-    "test-node":"pnpm run pre && pnpm --filter @pratiq/nestore run test-node"
+    "pre": "pnpm install && pnpm run build && clear",
+    "test-node": "pnpm run pre && pnpm --filter @pratiq/nestore run test-node"
   },
   "devDependencies": {
-    "@pratiq/nestore-config": "workspace:*",
     "@changesets/cli": "^2.22.0",
+    "@pratiq/nestore-config": "workspace:*",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "turbo": "latest"
   },
-  "packageManager": "pnpm@7.15.0"
+  "packageManager": "pnpm@7.15.0",
+  "dependencies": {
+    "@types/node": "^18.16.3"
+  }
 }

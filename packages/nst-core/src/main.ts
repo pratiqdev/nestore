@@ -1,30 +1,9 @@
-import { NestoreOptions } from "@pratiq/nestore-types";
+import { NestoreOptions, StoreInitializer } from "@pratiq/nestore-types";
 import EventEmitter from "./event";
 import { debug } from "./debug";
 import tinyId from "./tinyId";
+import ERRORS from "./errors";
 
-// & {
-//     [K in keyof T]?: T[K] extends Record<string | number, unknown>
-//     ? ProxyObject<T[K]>
-//     : T[K];
-// };
-
-// export type MakeDataPropsOptional<T> = {
-//     [K in keyof T]: {
-//       [P in keyof T[K]]: Partial<T[K][P]> | undefined;
-//     }
-//   };
-// export type ProxyObject<T> = Partial<T & Record<string | number, any>>
-
-// export type StoreMethods<T> = {
-//     [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
-// }[keyof T];
-
-// export type StoreProps<T> = {
-//     [K in keyof T]: T[K] extends (...args: any[]) => any ? never : K;
-// }[keyof T];
-
-// export type ProxyObject<T> = Partial<Record<StoreProps<T>, any>> & Record<StoreMethods<T>, any>;
 
 const sendToReduxDevTools = (action: any, state: any) => {
     if (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) {
@@ -35,28 +14,29 @@ const sendToReduxDevTools = (action: any, state: any) => {
 
 
 
+
 // When initialState is an object
 function createStore<T extends Object>(
-    initialState: Partial<T>,
+    initialState?: Partial<T>,
     options?: NestoreOptions
 ): Partial<T> & Record<string | number, any>;
 
 // When initialState is a function
 function createStore<T extends Object>(
-    initialState: (self: Partial<T>) => Partial<T>,
+    initialState?: StoreInitializer<T>,
     options?: NestoreOptions
 ): Partial<T> & Record<string | number, any>;
 
 //& Implementation                                                                                                      
 function createStore<T extends Object>(
-    initialState: T | ((self: T) => T),
+    initialState: T | StoreInitializer<T> = {} as T,
     options: NestoreOptions = {}
 ): Partial<T> & Record<string | number, any> {
 
     let globalDebugNamespace:string = ''
     const EE = new EventEmitter();
     const DT = typeof window !== 'undefined' ? (window as any).__REDUX_DEVTOOLS_EXTENSION__.connect() : null;
-
+    
     //&                                                                          
     if(options?.debug){
         globalDebugNamespace = typeof options?.debug === 'string' ? options.debug : '*'
@@ -76,8 +56,18 @@ function createStore<T extends Object>(
         set: debug('set', globalDebugNamespace),
         action: debug('action', globalDebugNamespace),
     }
+    
 
+    
+    try{
 
+    if(initialState && (typeof initialState !== 'object' && typeof initialState !== 'function')){
+        throw Error(ERRORS.initial_state_bad_type + `Received: ${typeof initialState}`)
+    }
+
+    if(options && typeof options !== 'object'){
+        throw Error(ERRORS.options_bad_type)
+    }
     const proxy_apply = (target: Partial<T> | Function, thisArg:any, argumentsList: any[]) => {
         console.log('>>>>>>>>>>>> Proxy - apply:', target, thisArg, argumentsList)
         if(typeof target !== 'function'){
@@ -230,7 +220,7 @@ function createStore<T extends Object>(
       }) as T
 
     if (typeof initialState === 'function') {
-        const func = initialState as (self: T) => T;
+        const func = initialState as StoreInitializer<T>;
         let newState = func(proxy);
         Object.assign(state, newState)
     } else {
@@ -266,6 +256,13 @@ function createStore<T extends Object>(
     }
 
     return proxy
+    }catch(err){
+        console.log('???', (err as any).message ?? err)
+        logger.init.log(err)
+        return {}
+    }
+ 
+
 }
 
 if (typeof window !== "undefined") {
