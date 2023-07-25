@@ -1,0 +1,23 @@
+type StateCreator<T extends Record<string, any>> = (set: T) => T;
+
+function id<T extends Record<string, any>>(x: StateCreator<T>) {
+    return x;
+}
+
+function createStore<T extends Record<string, any>>(creator: StateCreator<T>): T {
+    const handlers = {};
+    const state: T = creator({} as T);
+    const proxy = new Proxy(state, handlers) as T;
+    return proxy;
+}
+
+const nst3 = createStore(
+    id((self) => ({
+        greetings: 'hello',
+        location: 'world',
+        ayo: () => self.greetings + ', ' + self.location
+    }))
+);
+
+console.log(nst3.greetings); // intellisense correctly shows "string"
+console.log(nst3.ayo()); // intellisense correctly shows "() => string"

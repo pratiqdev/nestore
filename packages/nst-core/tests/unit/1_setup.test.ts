@@ -3,15 +3,31 @@
 import { expect } from 'chai'
 import createStore from '../../dist/main.js'
 
-describe('nestore setup', function () {
+describe('NESTORE: setup', function () {
 
   it('Provides a function as the default export', function () {
-      const nst = createStore({
+      const nstFunc = createStore(() => ({
         greetings: "fellow humans"
+      }), {
+        debug: true
       })
-      console.log(nst)
 
-      expect(typeof createStore).to.eq('function')
+    const nstObj = createStore({
+      greetings: "fellow humans"
+    }, {
+      debug: true
+    })
+
+    nstFunc.greetings
+
+    nstObj.greetings
+    nstObj.nonExistentProp = 3
+    nstObj.nonExistentProp
+
+    
+    expect(typeof createStore).to.eq('function')
+    expect(nstFunc.greetings).to.eq('function')
+    expect(nstObj.greetings).to.eq('function')
   });
 
 

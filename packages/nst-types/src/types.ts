@@ -29,17 +29,23 @@ export type AnyRecordProps = { [prop: string]: any; }
 
 
 
-export type NestoreReturn<T extends object> = {
+export type NestoreReturn<T extends Object> = DynamicStore<T> & {
   [K in keyof T]: T[K];
-} & {
-  get: {
-    <K extends keyof T>(key: K): T[K];
-    <K extends keyof T>(func: (store: Partial<T>) => T[K]): ReturnType<typeof func>;
-  };
-  set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T, K>) => boolean;
-  reset: () => void;
-  store: Partial<T>;
-} & AnyRecordProps;
+}
+
+export type DynamicStore<T extends object> = T & Record<string | number, any>;
+
+// & {
+
+// export type TestReturn = 
+//   get: {
+//     <K extends keyof T>(key: K): T[K];
+//     <K extends keyof T>(func: (store: Partial<T>) => T[K]): ReturnType<typeof func>;
+//   };
+//   set: <K extends keyof T>(key: K, valueOrSetterFunc: T[K] | SetterFunc<T, K>) => boolean;
+//   reset: () => void;
+//   store: Partial<T>;
+// } & AnyRecordProps;
 
 
 export type BaseRecord = {
@@ -48,15 +54,7 @@ export type BaseRecord = {
 
 
   
-export type StoreInitializer<T extends BaseRecord> = (proxyRef: Partial<T>) => T;
+export type StoreInitializer<T extends BaseRecord> = (proxyRef: T) => T;
   
 
   
-// Define the state manager types
-export type Store = Record<string, any>;
-export type GetterFunc<T> = (store: Partial<T>) => T | T[keyof T];
-export type SetterFunc<T, K extends keyof T> = (store: Partial<T>) => T[K] | undefined;
-
-// Define the event emitter types
-export type Listener = (event: any) => void;
-export type Event = string;

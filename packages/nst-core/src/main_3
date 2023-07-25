@@ -1,0 +1,22 @@
+function setup<T>(init: (self: T) => T): T {
+    return {} as T;
+}
+
+type InferFromSetup<T> = T extends (infer U)[] ? U : never;
+
+function createStore<T extends (x: any) => any>(
+    initializer: T
+): InferFromSetup<Parameters<T>> {
+    let state = setup(initializer);
+    let proxy = new Proxy(state, {}) as InferFromSetup<Parameters<T>>;
+    return proxy;
+}
+
+const nst2 = createStore((self) => ({
+    greetings: 'hello',
+    location: 'world',
+    ayo: () => self.greetings + ', ' + self.location,
+}));
+
+nst2.greetings;
+nst2.ayo();

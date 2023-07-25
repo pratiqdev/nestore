@@ -1,0 +1,21 @@
+type Fn<T> = { (): T; new(): T; }
+function build<T extends object>(obj: T | ((self: T) => T)): Fn<T> {
+    if (typeof obj === "function") {
+        const fn = obj as (self: T) => T;
+        const result = fn({} as T);
+        return Object.assign(function () { }, { prototype: result }) as Fn<T>;
+    } else {
+        return Object.assign(function () { }, { prototype: obj }) as Fn<T>;
+    }
+}
+
+const Store = build(self => ({
+    greetings: 'hello',
+    location: 'world',
+    ayo: () => self.greetings + ', ' + self.location
+}));
+
+const nst5 = new Store();
+
+console.log(nst5.greetings); // inferred as string
+console.log(nst5.ayo()); // inferred as () => string
