@@ -14,17 +14,17 @@ export type NestoreOptions = {
     debug?: boolean;
 }
 
-export type MakeDataPropsOptional<T> = {
-    [K in keyof T]: {
-        [P in keyof T[K]]: Partial<T[K][P]> | undefined;
-    }
-};
+// type MakeDataPropsOptional<T> = {
+//     [K in keyof T]: {
+//         [P in keyof T[K]]: Partial<T[K][P]> | undefined;
+//     }
+// };
   
-export type ProxyObject<T> = {
-    [K in keyof T]: T[K] extends Record<string | number, unknown>
-        ? ProxyObject<T[K]>
-        : T[K];
-  };
+// type ProxyObject<T> = {
+//     [K in keyof T]: T[K] extends Record<string | number, unknown>
+//         ? ProxyObject<T[K]>
+//         : T[K];
+//   };
 
   
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -155,11 +155,42 @@ function createStore<T extends AnyRecord>(
         }
 
         if(typeof returnable === 'function'){
-            return async function (...args:any[]) {
-                console.log('>>> its a function?? this is middleware????')
-                let res = await (returnable as Function).apply(receiver, args)
-                console.log('>>>> we did it! here is the result:', res)
-                return res
+            // return function (...args:any[]) {
+            //     console.log(`[${actionId}|I|${Date.now()}\n\t`, args)
+            //     let res = (returnable as Function).apply(receiver, args)
+            //     console.log(`[${actionId}|O|${Date.now()}\n\t`, res)
+            //     return res
+            // }
+            // console.log('CONSTRUCTOR NAME:', returnable.constructor.name)
+            // if (returnable.constructor.name === 'AsyncFunction') {
+            //     return async function (...args:any[]) { // Note async here
+            //         console.log(`[${actionId}|I|${Date.now()}|ASYNC]\n\t`, args)
+            //         let res = await returnable.apply(receiver, args) // Note await here
+            //         console.log(`[${actionId}|O|${Date.now()}|ASYNC]\n\t`, res)
+            //         return res
+            //     }
+            // } else {
+            //     return function (...args:any[]) {
+            //         console.log(`[${actionId}|I|${Date.now()}|SYNC]\n\t`, args)
+            //         let res = returnable.apply(receiver, args)
+            //         console.log(`[${actionId}|O|${Date.now()}|SYNC]\n\t`, res)
+            //         return res
+            //     }
+            // }
+            return function (...args:any[]) {
+                console.log(`[${actionId}|I|${Date.now()}\n\t`, args)
+                let res = returnable.apply(receiver, args)
+        
+                if (res instanceof Promise) {
+                    // If the result is a promise, we need to handle it asynchronously
+                    return res.then((asyncRes) => {
+                        console.log(`[${actionId}|O|${Date.now()}\n\t`, asyncRes)
+                        return asyncRes
+                    });
+                } else {
+                    console.log(`[${actionId}|O|${Date.now()}\n\t`, res)
+                    return res
+                }
             }
         }
 

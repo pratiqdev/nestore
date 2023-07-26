@@ -1,4 +1,8 @@
-export { expect } from 'chai'
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+
+chai.use(chaiAsPromised);
+export const expect = chai.expect;
 
 const COLORS = {
     reset: '\x1b[0m',
@@ -11,7 +15,7 @@ const COLORS = {
     magenta: '\x1b[35m',
     cyan: '\x1b[36m',
     white: '\x1b[37m',
-
+ 
     blackBg: '\x1b[40m',
     redBg: '\x1b[41m',
     greenBg: '\x1b[42m',
