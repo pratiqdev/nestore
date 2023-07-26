@@ -1,9 +1,33 @@
-import { NestoreOptions, StoreInitializer } from "@pratiq/nestore-types";
+// import { NestoreOptions, StoreInitializer } from "@pratiq/nestore-types";
 import EventEmitter from "./event";
 import { debug } from "./debug";
 import tinyId from "./tinyId";
 import ERRORS from "./errors";
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export type StoreInitializer<T> = (self:T) => T | (() => T)
+
+export type NestoreOptions = {
+    /** Enable internal debugging of state and methods.  
+     * Has same effect as setting env variable `DEBUG=@nst`
+     */
+    debug?: boolean;
+}
+
+export type MakeDataPropsOptional<T> = {
+    [K in keyof T]: {
+        [P in keyof T[K]]: Partial<T[K][P]> | undefined;
+    }
+};
+  
+export type ProxyObject<T> = {
+    [K in keyof T]: T[K] extends Record<string | number, unknown>
+        ? ProxyObject<T[K]>
+        : T[K];
+  };
+
+  
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 const sendToReduxDevTools = (action: any, state: any) => {
     if (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) {
@@ -16,26 +40,26 @@ const isPlainObject = (value: any): value is object => {
     return Object.prototype.toString.call(value) === '[object Object]';
 }
 
+type AnyRecord = Record<string | number, any>
 
 
+// // When initialState is an object
+// function createStore<T extends Object>(
+//     initialState?: Partial<T>,
+//     options?: NestoreOptions
+// ): Partial<T>;
 
-// When initialState is an object
-function createStore<T extends Object>(
-    initialState?: Partial<T>,
-    options?: NestoreOptions
-): Partial<T>;
-
-// When initialState is a function
-function createStore<T extends Object>(
-    initialState?: StoreInitializer<T>,
-    options?: NestoreOptions
-): Partial<T>;
+// // When initialState is a function
+// function createStore<T extends Object>(
+//     initialState?: StoreInitializer<T>,
+//     options?: NestoreOptions
+// ): Partial<T>;
 
 //& Implementation                                                                                                      
-function createStore<T extends Object>(
-    initialState: T | StoreInitializer<T> = {} as T,
+function createStore<T extends AnyRecord>(
+    initialState: StoreInitializer<T> | T = {} as T,
     options: NestoreOptions = {}
-): Partial<T> {
+):  T {
 
     let globalDebugNamespace:string = ''
     const EE = new EventEmitter();
@@ -276,56 +300,3 @@ if (typeof window !== "undefined") {
 }
 
 export default createStore;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const nst1 = createStore({
-    greetings: 'hello' 
-})
-
-//&                                                                                                                     
-type Store = {
-    greetings: string;
-    location: string;
-    ayo: () => string;
-}
-
-let GREETING = 'hello'
-const nst = createStore<Store>((self) => ({
-    greetings: GREETING,
-    location: 'world',
-    ayo: () => self.greetings + ', ' + self.location
-}))
-delete nst.greetings
-nst.ayo()
-// Cannot invoke an object which is possibly 'undefined'.ts(2722)
-// (property) ayo?: (() => string) | undefined
-
-
-nst1.greetings = 'ayo'
-nst1.ayo = 'greetings'
-
-
-const n1 = createStore({ greetings: 'hello' })
-delete n1.greetings
-n1.ayo = 'whjat'
-
-
-const n2 = createStore(() => ({ greetings: 'hello' }))
-delete n2.greetings
-n2.ayo = 'whjat'

@@ -36,7 +36,9 @@ describe(heading('B | get'), function () {
 
   it('B.2 | Returns undefined for nonexistent keys', function () {
     const nst = createStore(sto)
+    // @ts-expect-error
     expect(nst.flapper).to.be.undefined
+    // @ts-expect-error
     expect(nst.blippo).to.be.undefined
   });
 

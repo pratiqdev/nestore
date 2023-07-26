@@ -1,0 +1,6 @@
+{
+    "watch": ["**/src/**/*", "**/tests/**/*"],
+    "ignore": [],
+    "ext": "",
+    "exec": "turbo run build --filter=nestore-types --filter=nestore && turbo run test"
+}

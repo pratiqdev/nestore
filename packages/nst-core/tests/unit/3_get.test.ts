@@ -3,7 +3,7 @@ import nestore from '../../dist/main.js'
 import { beforeEach } from 'mocha';
 type Store = {
   count: number;
-  greetings: string;
+  greetings?: string;
   invoked?: string;
   nested: {
     properties:{
@@ -13,7 +13,7 @@ type Store = {
   },
   invokeMe: (arg1:any, arg2:string) => number
 }
-
+ 
 let nst = nestore<Store>((self) => ({
   count: 2,
   greetings: "fellow humans",
@@ -43,6 +43,7 @@ describe('NESTORE: nst.get', function () {
     nst = nestore((x) => ({
       count: 2,
       greetings: "fellow humans",
+      invoked: undefined,
       nested: {
         properties:{
           are: ['cool','neat','okay'],
@@ -59,7 +60,7 @@ describe('NESTORE: nst.get', function () {
         return 5
       }
     }), {
-      debug: false
+      debug: false 
     })
     
   })
@@ -81,7 +82,7 @@ describe('NESTORE: nst.get', function () {
     nst.count = 7
     expect(nst.count).to.eq(7)
     
-    delete nst.greetings
+    delete nst.greetings // marked as optional
     expect(nst.greetings).to.be.undefined
   });
 
