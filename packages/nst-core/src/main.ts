@@ -236,7 +236,7 @@ function createStore<T extends Object>(
         let newState = func(proxy);
         Object.assign(state, newState)
     } else {
-        state = initialState as T;
+        state = JSON.parse(JSON.stringify(initialState as T));
     }
 
     proxy = new Proxy(state, {
