@@ -23,19 +23,19 @@ const isPlainObject = (value: any): value is object => {
 function createStore<T extends Object>(
     initialState?: Partial<T>,
     options?: NestoreOptions
-): Partial<T> & Record<string | number, any>;
+): Partial<T>;
 
 // When initialState is a function
 function createStore<T extends Object>(
     initialState?: StoreInitializer<T>,
     options?: NestoreOptions
-): Partial<T> & Record<string | number, any>;
+): Partial<T>;
 
 //& Implementation                                                                                                      
 function createStore<T extends Object>(
     initialState: T | StoreInitializer<T> = {} as T,
     options: NestoreOptions = {}
-): Partial<T> & Record<string | number, any> {
+): Partial<T> {
 
     let globalDebugNamespace:string = ''
     const EE = new EventEmitter();
@@ -294,38 +294,38 @@ export default createStore;
 
 
 
-// const nst1 = createStore({
-//     greetings: 'hello'
-// })
+const nst1 = createStore({
+    greetings: 'hello'
+})
 
-// //&                                                                                                                     
-// type Store = {
-//     greetings: string;
-//     location: string;
-//     ayo: () => string;
-// }
+//&                                                                                                                     
+type Store = {
+    greetings: string;
+    location: string;
+    ayo: () => string;
+}
 
-// let GREETING = 'hello'
-// const nst = createStore<Store>((self) => ({
-//     greetings: GREETING,
-//     location: 'world',
-//     ayo: () => self.greetings + ', ' + self.location
-// }))
-// delete nst.greetings
-// nst.ayo?.()
-// // Cannot invoke an object which is possibly 'undefined'.ts(2722)
-// // (property) ayo?: (() => string) | undefined
-
-
-// nst1.greetings = 'ayo'
-// nst1.ayo = 'greetings'
+let GREETING = 'hello'
+const nst = createStore<Store>((self) => ({
+    greetings: GREETING,
+    location: 'world',
+    ayo: () => self.greetings + ', ' + self.location
+}))
+delete nst.greetings
+nst.ayo()
+// Cannot invoke an object which is possibly 'undefined'.ts(2722)
+// (property) ayo?: (() => string) | undefined
 
 
-// const n1 = createStore({ greetings: 'hello' })
-// delete n1.greetings
-// n1.ayo = 'whjat'
+nst1.greetings = 'ayo'
+nst1.ayo = 'greetings'
 
 
-// const n2 = createStore(() => ({ greetings: 'hello' }))
-// delete n2.greetings
-// n2.ayo = 'whjat'
+const n1 = createStore({ greetings: 'hello' })
+delete n1.greetings
+n1.ayo = 'whjat'
+
+
+const n2 = createStore(() => ({ greetings: 'hello' }))
+delete n2.greetings
+n2.ayo = 'whjat'
