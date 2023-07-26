@@ -11,14 +11,10 @@ describe('NESTORE: setup', function () {
 
     const nstFunc = createStore(() => ({
       greetings: "fellow humans"
-    }), {
-      debug: true
-    })
+    }))
 
     const nstObj = createStore({
       greetings: "fellow humans"
-    }, {
-      debug: true
     })
 
     

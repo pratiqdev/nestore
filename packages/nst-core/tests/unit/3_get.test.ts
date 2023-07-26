@@ -59,7 +59,7 @@ describe('NESTORE: nst.get', function () {
         return 5
       }
     }), {
-      debug: true
+      debug: false
     })
     
   })

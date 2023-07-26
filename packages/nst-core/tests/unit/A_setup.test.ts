@@ -23,9 +23,9 @@ describe(heading('A | setup'), function () {
       '3',
       'a string',
     ]
-    let nst:any;
+
     stores.forEach((store:any) => {
-      expect(() => nst = createStore(store)).to.throw(Error);
+      expect(() => createStore(store)).to.throw(Error);
     })
   });
 

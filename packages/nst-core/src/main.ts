@@ -12,6 +12,10 @@ const sendToReduxDevTools = (action: any, state: any) => {
 };
 
 
+const isPlainObject = (value: any): value is object => {
+    return Object.prototype.toString.call(value) === '[object Object]';
+}
+
 
 
 
@@ -59,15 +63,23 @@ function createStore<T extends Object>(
     
 
     
-    try{
 
-    if(initialState && (typeof initialState !== 'object' && typeof initialState !== 'function')){
-        throw Error(ERRORS.initial_state_bad_type + `Received: ${typeof initialState}`)
+  
+    if (typeof initialState === 'object') {
+        if (!isPlainObject(initialState)) {
+            throw new Error(`InitialState is of invalid type. Expected plain object or function, but received: ${typeof initialState}`);
+        }
+    } else if (typeof initialState !== 'function') {
+        throw new Error(`InitialState is of invalid type. Expected 'function' or 'object', but received: ${typeof initialState}`);
     }
 
-    if(options && typeof options !== 'object'){
+    if (options && !isPlainObject(options)){
         throw Error(ERRORS.options_bad_type)
     }
+
+
+
+
     const proxy_apply = (target: Partial<T> | Function, thisArg:any, argumentsList: any[]) => {
         console.log('>>>>>>>>>>>> Proxy - apply:', target, thisArg, argumentsList)
         if(typeof target !== 'function'){
@@ -256,12 +268,6 @@ function createStore<T extends Object>(
     }
 
     return proxy
-    }catch(err){
-        console.log('???', (err as any).message ?? err)
-        logger.init.log(err)
-        return {}
-    }
- 
 
 }
 
