@@ -295,7 +295,7 @@ export default createStore;
 
 
 const nst1 = createStore({
-    greetings: 'hello'
+    greetings: 'hello' 
 })
 
 //&                                                                                                                     
