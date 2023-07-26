@@ -60,4 +60,28 @@ describe(heading('B | get'), function () {
 
   });
 
+  it('B.4 | Async modifiers return computed values', async function () {
+    type NST = {
+      firstName:string;
+      lastName:string;
+      age: number;
+      who: () => Promise<string>;
+    }
+    const nst = createStore<NST>((self) => ({
+      firstName: 'John',
+      lastName: 'Smith',
+      age: 33,
+      who: async () => {
+        await new Promise(r => setTimeout(r, 1000))
+        return `I am ${self.firstName} ${self.lastName} and I am ${self.age} years old`
+      }
+    }), { debug: true })
+
+
+    const who2Result = await nst.who();
+
+    expect(who2Result).to.eq("I am John Smith and I am 33 years old");
+
+  });
+
 });
