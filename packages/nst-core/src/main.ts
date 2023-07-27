@@ -145,7 +145,7 @@ function createStore<T extends AnyRecord>(
                 current = current[part];
             }
 
-            returnable = current;
+             returnable = current;
             // return current;
         }
 
