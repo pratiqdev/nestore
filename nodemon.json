@@ -2,5 +2,5 @@
     "watch": ["**/src/**/*", "**/tests/**/*"],
     "ignore": [],
     "ext": "",
-    "exec": "turbo run build --filter=nestore-types --filter=nestore && turbo run test"
+    "exec": "turbo run build --parallel --no-cache --filter=nestore-types --filter=nestore && turbo run test"
 }

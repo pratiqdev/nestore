@@ -4,34 +4,17 @@ import { debug } from "./debug";
 import tinyId from "./tinyId";
 import ERRORS from "./errors";
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-export type StoreInitializer<T> = (self:T) => T | (() => T)
+import { AnyRecord, StoreInitializer, NestoreOptions, Handlers, BaseNestoreOptions, StorageOptionsB, StorageOptionsA } from "@pratiq/nestore-types";
 
-export type NestoreOptions = {
-    /** Enable internal debugging of state and methods.  
-     * Has same effect as setting env variable `DEBUG=@nst`
-     */
-    debug?: boolean;
-}
-
-// type MakeDataPropsOptional<T> = {
-//     [K in keyof T]: {
-//         [P in keyof T[K]]: Partial<T[K][P]> | undefined;
-//     }
-// };
-  
-// type ProxyObject<T> = {
-//     [K in keyof T]: T[K] extends Record<string | number, unknown>
-//         ? ProxyObject<T[K]>
-//         : T[K];
-//   };
-
-  
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
 
 const sendToReduxDevTools = (action: any, state: any) => {
-    if (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) {
-        (window as any).__REDUX_DEVTOOLS_EXTENSION__.send(action, state);
+    try{
+        if (typeof window !== 'undefined' && (window as any).__REDUX_DEVTOOLS_EXTENSION__) {
+            (window as any).__REDUX_DEVTOOLS_EXTENSION__.send(action, state);
+        }
+    }catch(err){
+        console.log('DEVTOOLS ERROR:', err)
     }
 };
 
@@ -40,30 +23,57 @@ const isPlainObject = (value: any): value is object => {
     return Object.prototype.toString.call(value) === '[object Object]';
 }
 
-type AnyRecord = Record<string | number, any>
+function hasStorage(options: NestoreOptions<any>): options is BaseNestoreOptions<any> & StorageOptionsB {
+    return (options as any).storage !== undefined;
+}
 
-
-// // When initialState is an object
-// function createStore<T extends Object>(
-//     initialState?: Partial<T>,
-//     options?: NestoreOptions
-// ): Partial<T>;
-
-// // When initialState is a function
-// function createStore<T extends Object>(
-//     initialState?: StoreInitializer<T>,
-//     options?: NestoreOptions
-// ): Partial<T>;
+function hasStorageKey(options: NestoreOptions<any>): options is BaseNestoreOptions<any> & StorageOptionsA | BaseNestoreOptions<any> & StorageOptionsB {
+    return (options as any).storageKey !== undefined;
+}
 
 //& Implementation                                                                                                      
 function createStore<T extends AnyRecord>(
     initialState: StoreInitializer<T> | T = {} as T,
-    options: NestoreOptions = {}
-):  T {
+    options: NestoreOptions<T> = {}
+    ): T {
+        
 
     let globalDebugNamespace:string = ''
     const EE = new EventEmitter();
     const DT = typeof window !== 'undefined' ? (window as any).__REDUX_DEVTOOLS_EXTENSION__.connect() : null;
+    let storageObject: null | Storage = null
+    let state: T = {} as T
+
+    // let opt:any = options as any
+    // if(opt.storageKey && typeof opt.storageKey === 'string' && opt.storageKey.length > 0){
+    //     if(opt.storage){
+    //         console.log('checking custom storage...')
+    //         if(typeof opt.storage.getItem === 'function' && typeof opt.storage.setItem === 'function'){
+    //             storageObject = opt.storage
+    //             console.log('Custom storage OK', storageObject)
+    //         }else{
+    //             console.log('Custom storage does not conform to Storage API')
+    //         }
+
+    //     }else if(typeof window !== 'undefined' && window.localStorage){
+    //         console.log('attempting to use localStorage...')
+    //         storageObject = window.localStorage
+    //     }else{
+    //         console.log('! A storage key was provided but there is no storage object to use.')
+    //     }
+
+    //     if(storageObject){
+    //         console.log('Loading state from storage...')
+    //         try{
+    //             let stored = storageObject.getItem(opt.storageKey) ?? '{}'
+    //             let parsed = JSON.parse(stored)
+    //             Object.assign(state, parsed)
+    //             console.log('Storage loaded OK', state)
+    //         }catch(err){
+    //             console.log('Failed to load state from storage')
+    //         }
+    //     }
+    // }
     
     //&                                                                          
     if(options?.debug){
@@ -102,21 +112,19 @@ function createStore<T extends AnyRecord>(
     }
 
 
-
-
-    const proxy_apply = (target: Partial<T> | Function, thisArg:any, argumentsList: any[]) => {
-        console.log('>>>>>>>>>>>> Proxy - apply:', target, thisArg, argumentsList)
-        if(typeof target !== 'function'){
-        console.log('NON FUNCTION TARGET PASSED TO PROXY APPLY METHOD')
-        return;
+    const updateStorage = (target:T | Partial<T>) => {
+        if(storageObject){
+            try{
+                storageObject.setItem(opt.storageKey,  JSON.stringify(target))
+            }catch(err){
+                console.log('Failed to parse target and update storage:', err)
+            }
         }
-        let actionId = tinyId(4)
-        // Custom logic before function call
-        const result = target.apply(thisArg, argumentsList); // Call the original function
-        // Custom logic after function call
-        logger.action.log({ action: 'modifier', actionId, result, target, argumentsList })
-        return result; // Return the result of the function call (optional)
     }
+
+
+
+
 
     const proxy_get = (target: Partial<T>, prop: string | symbol, receiver: any) => {
         // Return the entire store if 'get' is invoked without arguments
@@ -155,55 +163,47 @@ function createStore<T extends AnyRecord>(
         }
 
         if(typeof returnable === 'function'){
-            // return function (...args:any[]) {
-            //     console.log(`[${actionId}|I|${Date.now()}\n\t`, args)
-            //     let res = (returnable as Function).apply(receiver, args)
-            //     console.log(`[${actionId}|O|${Date.now()}\n\t`, res)
-            //     return res
-            // }
-            // console.log('CONSTRUCTOR NAME:', returnable.constructor.name)
-            // if (returnable.constructor.name === 'AsyncFunction') {
-            //     return async function (...args:any[]) { // Note async here
-            //         console.log(`[${actionId}|I|${Date.now()}|ASYNC]\n\t`, args)
-            //         let res = await returnable.apply(receiver, args) // Note await here
-            //         console.log(`[${actionId}|O|${Date.now()}|ASYNC]\n\t`, res)
-            //         return res
-            //     }
-            // } else {
-            //     return function (...args:any[]) {
-            //         console.log(`[${actionId}|I|${Date.now()}|SYNC]\n\t`, args)
-            //         let res = returnable.apply(receiver, args)
-            //         console.log(`[${actionId}|O|${Date.now()}|SYNC]\n\t`, res)
-            //         return res
-            //     }
-            // }
             return function (...args:any[]) {
-                console.log(`[${actionId}|I|${Date.now()}\n\t`, args)
+                // console.log('>>>>> FUNC')
+                // console.log(`[${actionId}|I|${Date.now()}\n\t`, args)
                 let res = returnable.apply(receiver, args)
         
                 if (res instanceof Promise) {
                     // If the result is a promise, we need to handle it asynchronously
                     return res.then((asyncRes) => {
-                        console.log(`[${actionId}|O|${Date.now()}\n\t`, asyncRes)
+                        // console.log(`[${actionId}|O|${Date.now()}\n\t`, asyncRes)
                         return asyncRes
                     });
                 } else {
-                    console.log(`[${actionId}|O|${Date.now()}\n\t`, res)
+                    // console.log(`[${actionId}|O|${Date.now()}\n\t`, res)
                     return res
                 }
             }
         }
 
-        return returnable
+        return Reflect.get(target, prop, receiver)
 
         // return Reflect.get(target, prop, receiver) as T[typeof prop]
     }
 
     const proxy_set = (target: Partial<T>, prop: string | symbol, value: any, receiver: any) => {
         let actionId = tinyId(4)
-        
+        console.log('> ROOT | set:', {
+            target,
+            prop,
+            value,
+            receiver
+        })
+        console.log('> ROOT| set | Is target extensible:', Object.isExtensible(target));
+        console.log('> ROOT | set | Property descriptor:', Object.getOwnPropertyDescriptor(target, prop));
+        console.log('> ROOT | set prop:', prop)
+        console.log('> ROOT | set value:', value)
         const oldValue = Reflect.get(target, prop, receiver);
-        const result = Reflect.set(target, prop, value, receiver);
+        const result = Reflect.set(target, prop, value, receiver ?? target);
+        console.log('> ROOT | set result:', result)
+        if (result) {
+            updateStorage(target)
+        }
         
         if (oldValue !== value) {
             EE.emit(prop.toString(), {
@@ -226,80 +226,50 @@ function createStore<T extends AnyRecord>(
         const result = Reflect.deleteProperty(target, prop);
         logger.action.log({ action: 'delete', actionId, prop, oldValue, result, target })
         sendToReduxDevTools({ type: 'DELETE', payload: { prop } }, target);
+        if (result) {
+            updateStorage(target)
+        }
         return result
     }
 
-    // const handleEmitAll = (ignoreRoot?:boolean) => {
-
-    //     const emitted:string[] = []
-
-    //     const visitNodes = (obj:Partial<T>, visitor: (path:string, value: unknown) => unknown, stack:unknown[] = []) => {
-    //         if (typeof obj === 'object') {
-    //           for (const key in obj) {
-    //             visitor(stack.join('.').replace(/(?:\.)(\d+)(?![a-z_])/ig, '[$1]'), obj);
-    //             visitNodes(obj[key] as Partial<T>, visitor, [...stack, key]);
-    //           }
-    //         } else {
-    //           visitor(stack.join('.').replace(/(?:\.)(\d+)(?![a-z_])/ig, '[$1]'), obj);
-    //         }
-    //     }
-
-    //     visitNodes(store, (_path:string, value:unknown) => {
-    //         // let split = _path.split(/\[|\]\[|\]\.|\.|\]/g)
-    //         const split = this.#splitPathStringAtKnownDelimiters(_path)
-    //         .filter(x => x.trim() !== '')
-            
-    //         const key = split[split.length - 1] ?? '/'
-    //         const path = split.length ? split.join(this.#DELIMITER_CHAR) : '/'
 
 
-    //         if(!emitted.includes(path)){
-    //             if(ignoreRoot && path === '/') return
-    //             emitted.push(path)
-
-    //             // this.#DEV_EXTENSION
-    //             // && this.#DEV_EXTENSION.send({
-    //             //     type: `SET: ${path}`,
-    //             //     previousValue: get(ignoreRoot, path),
-    //             //     path,
-    //             //     value,
-    //             // }, this.store)
-                
-    //             this.#emit({
-    //                 path,
-    //                 key,
-    //                 value,
-    //                 // timestamp: Date.now()
-    //             })
-    //         }
-
-    //     });
-          
-    // }
-
-
-    let state: T = {} as T
-    let proxy: T = new Proxy(state, {
-        apply: proxy_apply,
+    let handlers: Handlers<T> = {
         get: proxy_get,
         set: proxy_set,
         deleteProperty: proxy_delete
-      }) as T
+    }
+
+    let proxy: T = new Proxy(state, handlers) as T
+
 
     if (typeof initialState === 'function') {
         const func = initialState as StoreInitializer<T>;
-        let newState = func(proxy);
+        let newState = func(state as T);
         Object.assign(state, newState)
     } else {
-        state = JSON.parse(JSON.stringify(initialState as T));
+        let newState= JSON.parse(JSON.stringify(initialState as T));
+        Object.assign(state, newState)
     }
 
-    proxy = new Proxy(state, {
-        apply: proxy_apply,
-        get: proxy_get,
-        set: proxy_set,
-        deleteProperty: proxy_delete
-    }) as T
+    if(options.middleware){
+        for (const middleware of options.middleware) {
+            console.log('>>> Registering middleware:', middleware?.name ?? middleware)
+            handlers = middleware(proxy, () => handlers) as Handlers<T>;
+        }
+    }
+
+    proxy = new Proxy(state, handlers) as T
+
+
+
+
+
+
+
+
+
+
 
     if(DT){
         DT.init(state);
@@ -320,6 +290,38 @@ function createStore<T extends AnyRecord>(
                 }
             }
         });
+    }
+
+    // loading storage must take place after store initializer to overwrite store values
+    let opt:any = options as any
+    if(opt.storageKey && typeof opt.storageKey === 'string' && opt.storageKey.length > 0){
+        if(opt.storage){
+            console.log('checking custom storage...')
+            if(typeof opt.storage.getItem === 'function' && typeof opt.storage.setItem === 'function'){
+                storageObject = opt.storage
+                console.log('Custom storage OK', storageObject)
+            }else{
+                console.log('Custom storage does not conform to Storage API')
+            }
+
+        }else if(typeof window !== 'undefined' && window.localStorage){
+            console.log('attempting to use localStorage...')
+            storageObject = window.localStorage
+        }else{
+            console.log('! A storage key was provided but there is no storage object to use.')
+        }
+
+        if(storageObject){
+            console.log('Loading state from storage...')
+            try{
+                let stored = storageObject.getItem(opt.storageKey) ?? '{}'
+                let parsed = JSON.parse(stored)
+                Object.assign(state, parsed)
+                console.log('Storage loaded OK', state)
+            }catch(err){
+                console.log('Failed to load state from storage')
+            }
+        }
     }
 
     return proxy
