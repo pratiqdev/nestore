@@ -1,12 +1,10 @@
 // import { NestoreOptions, StoreInitializer } from "@pratiq/nestore-types";
-import EventEmitter from "./event";
 import { debug } from "./debug";
 import tinyId from "./tinyId";
 import ERRORS from "./errors";
+import EE2 from "eventemitter2";
 
-import { AnyRecord, StoreInitializer, NestoreOptions, Handlers, BaseNestoreOptions, StorageOptionsB, StorageOptionsA } from "@pratiq/nestore-types";
-
- 
+import { AnyRecord, StoreInitializer, NestoreOptions, Handlers, BaseNestoreOptions, StorageOptionsB, StorageOptionsA, EventEmitter2 } from "@pratiq/nestore-types";
 
 const sendToReduxDevTools = (action: any, state: any) => {
     try{
@@ -23,57 +21,64 @@ const isPlainObject = (value: any): value is object => {
     return Object.prototype.toString.call(value) === '[object Object]';
 }
 
-function hasStorage(options: NestoreOptions<any>): options is BaseNestoreOptions<any> & StorageOptionsB {
-    return (options as any).storage !== undefined;
+
+
+export type EventChange = {
+    key: string;
+    path: string;
+    previousValue: any;
+    value: any;
 }
 
-function hasStorageKey(options: NestoreOptions<any>): options is BaseNestoreOptions<any> & StorageOptionsA | BaseNestoreOptions<any> & StorageOptionsB {
-    return (options as any).storageKey !== undefined;
-}
 
 //& Implementation                                                                                                      
 function createStore<T extends AnyRecord>(
     initialState: StoreInitializer<T> | T = {} as T,
     options: NestoreOptions<T> = {}
-    ): T {
+): T & EventEmitter2 {
         
 
     let globalDebugNamespace:string = ''
-    const EE = new EventEmitter();
+    const EE: EventEmitter2 = new EE2({
+
+        // set this to `true` to use wildcards
+        wildcard: true,
+      
+        // the delimiter used to segment namespaces
+        delimiter: '.', 
+      
+        // set this to `true` if you want to emit the newListener event
+        newListener: false, 
+      
+        // set this to `true` if you want to emit the removeListener event
+        removeListener: false, 
+      
+        // the maximum amount of listeners that can be assigned to an event
+        maxListeners: 10,
+      
+        // show event name in memory leak message when more than maximum amount of listeners is assigned
+        verboseMemoryLeak: false,
+      
+        // disable throwing uncaughtException if an error event is emitted and it has no listeners
+        ignoreErrors: false
+    });
+
+
     const DT = typeof window !== 'undefined' ? (window as any).__REDUX_DEVTOOLS_EXTENSION__.connect() : null;
     let storageObject: null | Storage = null
     let state: T = {} as T
 
-    // let opt:any = options as any
-    // if(opt.storageKey && typeof opt.storageKey === 'string' && opt.storageKey.length > 0){
-    //     if(opt.storage){
-    //         console.log('checking custom storage...')
-    //         if(typeof opt.storage.getItem === 'function' && typeof opt.storage.setItem === 'function'){
-    //             storageObject = opt.storage
-    //             console.log('Custom storage OK', storageObject)
-    //         }else{
-    //             console.log('Custom storage does not conform to Storage API')
-    //         }
 
-    //     }else if(typeof window !== 'undefined' && window.localStorage){
-    //         console.log('attempting to use localStorage...')
-    //         storageObject = window.localStorage
-    //     }else{
-    //         console.log('! A storage key was provided but there is no storage object to use.')
-    //     }
+    const listeners: Record<string, Function[]> = {};
 
-    //     if(storageObject){
-    //         console.log('Loading state from storage...')
-    //         try{
-    //             let stored = storageObject.getItem(opt.storageKey) ?? '{}'
-    //             let parsed = JSON.parse(stored)
-    //             Object.assign(state, parsed)
-    //             console.log('Storage loaded OK', state)
-    //         }catch(err){
-    //             console.log('Failed to load state from storage')
-    //         }
-    //     }
-    // }
+    const notifyListeners = (path: string, change: EventChange) => {
+        if (listeners[path]) {
+            listeners[path].forEach((listener) => listener(change));
+        }
+    };
+
+
+
     
     //&                                                                          
     if(options?.debug){
@@ -123,7 +128,33 @@ function createStore<T extends AnyRecord>(
     }
 
 
-
+    const eventMethods = [
+        'emit',
+        'emitAsync',
+        'addListener',
+        'on',
+        'prependListener',
+        'once',
+        'prependOnceListener',
+        'many',
+        'prependMany',
+        'onAny',
+        'prependAny',
+        'offAny',
+        'removeListener',
+        'off',
+        'removeAllListeners',
+        'setMaxListeners',
+        'getMaxListeners',
+        'eventNames',
+        'listenerCount',
+        'listeners',
+        'listenersAny',
+        'waitFor',
+        'listenTo',
+        'stopListeningTo',
+        'hasListeners'
+      ];
 
 
     const proxy_get = (target: Partial<T>, prop: string | symbol, receiver: any) => {
@@ -140,6 +171,8 @@ function createStore<T extends AnyRecord>(
             // return target;
             return;
         }
+
+        
 
 
 
@@ -158,6 +191,12 @@ function createStore<T extends AnyRecord>(
         }
 
         else if(typeof prop === 'string') {
+            if(eventMethods.includes(prop)){
+                console.log('proxy getter attempted access to event methods:', prop)
+                let method = (EE as any)[prop]
+                console.log('Returning eventEmitter method:', method)
+                return method
+            }
             // return Reflect.get(target, prop, receiver) as T[typeof prop]
             returnable = Reflect.get(target, prop, receiver) // as T[typeof prop]
         }
@@ -187,31 +226,32 @@ function createStore<T extends AnyRecord>(
     }
 
     const proxy_set = (target: Partial<T>, prop: string | symbol, value: any, receiver: any) => {
-        let actionId = tinyId(4)
         console.log('> ROOT | set:', {
             target,
             prop,
             value,
             receiver
         })
-        console.log('> ROOT| set | Is target extensible:', Object.isExtensible(target));
-        console.log('> ROOT | set | Property descriptor:', Object.getOwnPropertyDescriptor(target, prop));
-        console.log('> ROOT | set prop:', prop)
-        console.log('> ROOT | set value:', value)
+        let actionId = tinyId(4)
+        // console.log('> ROOT| set | Is target extensible:', Object.isExtensible(target));
+        // console.log('> ROOT | set | Property descriptor:', Object.getOwnPropertyDescriptor(target, prop));
+        // console.log('> ROOT | set prop:', prop)
+        // console.log('> ROOT | set value:', value)
         const oldValue = Reflect.get(target, prop, receiver);
         const result = Reflect.set(target, prop, value, receiver ?? target);
-        console.log('> ROOT | set result:', result)
+        // console.log('> ROOT | set result:', result)
         if (result) {
             updateStorage(target)
         }
         
         if (oldValue !== value) {
-            EE.emit(prop.toString(), {
-                key: prop.toString(),
-                path: prop.toString(),
-                value: value,
-            });
+            // EE.emit(prop.toString(), {
+            //     key: prop.toString(),
+            //     path: prop.toString(),
+            //     value: value,
+            // });
             sendToReduxDevTools({ type: 'SET', payload: { prop, value } }, target);
+            notifyListeners(prop.toString(), { key: prop.toString(), path: prop.toString(), previousValue: oldValue, value });
         }
         
         
@@ -228,6 +268,8 @@ function createStore<T extends AnyRecord>(
         sendToReduxDevTools({ type: 'DELETE', payload: { prop } }, target);
         if (result) {
             updateStorage(target)
+            sendToReduxDevTools({ type: 'SET', payload: { prop, value:undefined } }, target);
+            notifyListeners(prop.toString(), { key: prop.toString(), path: prop.toString(), previousValue: oldValue, value:undefined });
         }
         return result
     }
@@ -240,7 +282,7 @@ function createStore<T extends AnyRecord>(
         deleteProperty: proxy_delete
     }
 
-    let proxy: T = new Proxy(state, handlers) as T
+    let proxy: T & EventEmitter2 = new Proxy(state, handlers) as T & EventEmitter2
 
 
     if (typeof initialState === 'function') {
@@ -259,7 +301,7 @@ function createStore<T extends AnyRecord>(
         }
     }
 
-    proxy = new Proxy(state, handlers) as T
+    proxy = new Proxy(state, handlers) as T & EventEmitter2
 
 
 
@@ -271,6 +313,7 @@ function createStore<T extends AnyRecord>(
 
 
 
+    //& Setup DevTools                                                                                                  
     if(DT){
         DT.init(state);
         DT.subscribe((message: any) => {
@@ -292,6 +335,8 @@ function createStore<T extends AnyRecord>(
         });
     }
 
+
+    //& Load from storage                                                                                               
     // loading storage must take place after store initializer to overwrite store values
     let opt:any = options as any
     if(opt.storageKey && typeof opt.storageKey === 'string' && opt.storageKey.length > 0){
@@ -323,6 +368,7 @@ function createStore<T extends AnyRecord>(
             }
         }
     }
+
 
     return proxy
 

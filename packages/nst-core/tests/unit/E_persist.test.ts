@@ -3,12 +3,7 @@
 import { expect, heading } from './utils'
 import createStore from '../../dist/main.js'
 
-function createLocalStorageMock() {
-  let store:any = {
-    'persist-test-1': JSON.stringify({
-      v: 'valueFromLocalStorage'
-    })
-  };
+function createLocalStorageMock(store: Record<string, string> = {}) {
   return {
       getItem: function(key: string) {
           return store[key] || null;
@@ -30,6 +25,19 @@ function createLocalStorageMock() {
           return keys[index] || null;
       }
   };
+}
+
+
+const mockLocalStorage = createLocalStorageMock({
+  'persist-test-1': JSON.stringify({
+    v: 'valueFromLocalStorage'
+  })
+})
+
+const getKeyFromStorage = (key:string, prop:string) => {
+  let sto = mockLocalStorage.getItem(key)
+  let val = JSON.parse(sto ?? '{}')
+  return val[prop]
 }
 
 const sto = {
@@ -55,7 +63,7 @@ const sto = {
 
 describe(heading('E | persist'), function () {
 
-  it('E.1 | Middleware can intercept `get` actions and values', function () {
+  it('E.1 | Store loads data from storage', function () {
 
     type NST = {
       v:string;
@@ -65,14 +73,50 @@ describe(heading('E | persist'), function () {
       v: 'valueFromStore',
     }), {
       storageKey: 'persist-test-1',
-      storage: createLocalStorageMock()
+      storage: mockLocalStorage
     })
 
     expect(nst.v).eq('valueFromLocalStorage')
 
+  });
 
 
+  it('E.2 | Store sets storage on updates', function () {
 
+    type NST = {
+      v:string;
+    }
+
+    const nst = createStore<NST>((self) => ({
+      v: 'valueFromStore',
+    }), {
+      storageKey: 'persist-test-1',
+      storage: mockLocalStorage
+    })
+
+    nst.v = 'newValue'
+
+    expect(nst.v).eq('newValue')
+    expect(getKeyFromStorage('persist-test-1', 'v')).eq('newValue')
+  });
+
+  it('E.3 | Store sets storage on deletion', function () {
+
+    type NST = {
+      v?:string;
+    }
+
+    const nst = createStore<NST>((self) => ({
+      v: 'valueFromStore',
+    }), {
+      storageKey: 'persist-test-1',
+      storage: mockLocalStorage
+    })
+
+    delete nst.v 
+
+    expect(nst.v).undefined
+    expect(getKeyFromStorage('persist-test-1', 'v')).undefined
   });
 
 

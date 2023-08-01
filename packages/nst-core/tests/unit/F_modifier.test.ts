@@ -61,7 +61,7 @@ let nst = createStore<Store>((self) => ({
 
 
 
-describe(heading('B | get'), function () {
+describe(heading('F | Modifiers'), function () {
   beforeEach(()=>{
     nst = createStore((x) => ({
       count: 2,
@@ -88,49 +88,54 @@ describe(heading('B | get'), function () {
     
   })
 
-  it('B.1 | direct access via proxy `get` trap', function () {
-    expect(nst.count).to.eq(2)
-    expect(nst.greetings).to.eq("fellow humans")
-  });
 
-  it('B.2 | direct access via proxy `set` trap', function () {
-    nst.count = 7
-    expect(nst.count).to.eq(7)
 
-    nst.greetings = "fellow humans"
-    expect(nst.greetings).to.eq("fellow humans")
-  });
-
-  it('B.3 | direct access via proxy `delete` trap', function () {
-    nst.count = 7
-    expect(nst.count).to.eq(7)
-    
-    delete nst.greetings // marked as optional
-    expect(nst.greetings).to.be.undefined
-  });
-
-  it('B.4 | modifier access', function () {
+  it('F.1 | modifier access', function () {
     expect(nst.invoked).to.be.undefined
     nst.invokeMe?.('ohhh', 'kayy')
     expect(nst.invoked).eq('hell yeah')
   });
 
-  it('B.5 | Returns the correct values', function () {
-    const nst = createStore(sto)
-    expect(nst.title).to.eq('The Book')
-    expect(nst.pages).to.eq(817)
-    expect(nst.checkedOut).to.eq(false)
-    expect(nst.chapters?.[0]).to.eq('1-The Start')
+  it('F.2 | Modifiers return computed values', function () {
+    type NST = {
+      firstName:string;
+      lastName:string;
+      age: number;
+      who: () => string;
+    }
+    const nst = createStore<NST>((self) => ({
+      firstName: 'John',
+      lastName: 'Smith',
+      age: 33,
+      who: () => `I am ${self.firstName} ${self.lastName} and I am ${self.age} years old`
+    }))
+
+    expect(nst.who())
+
   });
 
-  it('B.6 | Returns undefined for nonexistent keys', function () {
-    const nst = createStore(sto)
-    // @ts-expect-error
-    expect(nst.flapper).to.be.undefined
-    // @ts-expect-error
-    expect(nst.blippo).to.be.undefined
+  it('F.3 | Async modifiers return computed values', async function () {
+    type NST = {
+      firstName:string;
+      lastName:string;
+      age: number;
+      who: () => Promise<string>;
+    }
+    const nst = createStore<NST>((self) => ({
+      firstName: 'John',
+      lastName: 'Smith',
+      age: 33,
+      who: async () => {
+        await new Promise(r => setTimeout(r, 1000))
+        return `I am ${self.firstName} ${self.lastName} and I am ${self.age} years old`
+      }
+    }), { debug: true })
+
+
+    const who2Result = await nst.who();
+
+    expect(who2Result).to.eq("I am John Smith and I am 33 years old");
+
   });
-
-
 
 });

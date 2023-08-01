@@ -124,6 +124,9 @@ importers:
       '@pratiq/nestore-types':
         specifier: workspace:*
         version: link:../nst-types
+      eventemitter2:
+        specifier: ^6.4.9
+        version: 6.4.9
     devDependencies:
       '@pratiq/nestore-config':
         specifier: workspace:*
@@ -7692,6 +7695,10 @@ packages:
     dependencies:
       '@types/node': 18.16.3
       require-like: 0.1.2
+    dev: false
+
+  /eventemitter2@6.4.9:
+    resolution: {integrity: sha512-JEPTiaOt9f04oa6NOkc4aH+nVp5I3wEjpHbIPqfgCdD5v5bUzy7xQqwcVO2aDQgOWhI28da57HksMrzK9HlRxg==}
     dev: false
 
   /eventemitter3@4.0.7:

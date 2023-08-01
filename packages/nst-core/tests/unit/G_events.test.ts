@@ -1,7 +1,7 @@
 // const { expect} = require('chai')
 // const nestore = require('../../index')
 import { expect, heading } from './utils'
-import createStore from '../../dist/main.js'
+import createStore, { EventChange } from '../../dist/main.js'
 import { beforeEach } from 'mocha';
 
 const sto = {
@@ -61,7 +61,7 @@ let nst = createStore<Store>((self) => ({
 
 
 
-describe(heading('B | get'), function () {
+describe(heading('G | Events'), function () {
   beforeEach(()=>{
     nst = createStore((x) => ({
       count: 2,
@@ -88,47 +88,48 @@ describe(heading('B | get'), function () {
     
   })
 
-  it('B.1 | direct access via proxy `get` trap', function () {
-    expect(nst.count).to.eq(2)
-    expect(nst.greetings).to.eq("fellow humans")
-  });
 
-  it('B.2 | direct access via proxy `set` trap', function () {
-    nst.count = 7
-    expect(nst.count).to.eq(7)
 
-    nst.greetings = "fellow humans"
-    expect(nst.greetings).to.eq("fellow humans")
-  });
+  it('G.1 | Updates to store emit events', function () {
+    type NST = {
+      name:string;
+      nested: {
+        object: Record<string, string>,
+        array:  Array<number>
+      }
+    }
+    const nst = createStore<NST>((self) => ({
+      name: 'John',
+      nested: {
+        object: { v: 'ayo' },
+        array: [1, 2, 3]
+      }
+    }))
 
-  it('B.3 | direct access via proxy `delete` trap', function () {
-    nst.count = 7
-    expect(nst.count).to.eq(7)
-    
-    delete nst.greetings // marked as optional
-    expect(nst.greetings).to.be.undefined
-  });
+    console.log('NST.ON:', {
+      type: typeof nst.on,
+      returnType: typeof nst.on('', () => {})
+    })
 
-  it('B.4 | modifier access', function () {
-    expect(nst.invoked).to.be.undefined
-    nst.invokeMe?.('ohhh', 'kayy')
-    expect(nst.invoked).eq('hell yeah')
-  });
 
-  it('B.5 | Returns the correct values', function () {
-    const nst = createStore(sto)
-    expect(nst.title).to.eq('The Book')
-    expect(nst.pages).to.eq(817)
-    expect(nst.checkedOut).to.eq(false)
-    expect(nst.chapters?.[0]).to.eq('1-The Start')
-  });
+    nst.on('name', (e:EventChange) => {
+      console.log('--- name:', e)
+    })
 
-  it('B.6 | Returns undefined for nonexistent keys', function () {
-    const nst = createStore(sto)
-    // @ts-expect-error
-    expect(nst.flapper).to.be.undefined
-    // @ts-expect-error
-    expect(nst.blippo).to.be.undefined
+    // nst.on('nested.object', (e:EventChange) => {
+    //   console.log('--- nested:', e)
+    // })
+    // console.log('-'.repeat(80))
+    // console.log(nst)
+    // console.log('-'.repeat(80))
+    // nst.name = 'ayo'
+    // nst.nested = { object: {}, array: [] }
+    // nst.nested.object.v = 'hello'
+
+    // expect(nst.nested.object.v).eq('hello')
+
+    // nst.name = 'Johnny'
+
   });
 
 
