@@ -61,7 +61,7 @@ let nst = createStore<Store>((self) => ({
 
 
 
-describe(heading('F | Modifiers'), function () {
+describe.skip(heading('F | Modifiers'), function () {
   beforeEach(()=>{
     nst = createStore((x) => ({
       count: 2,

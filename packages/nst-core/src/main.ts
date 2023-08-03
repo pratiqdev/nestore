@@ -4,7 +4,7 @@ import tinyId from "./tinyId";
 import ERRORS from "./errors";
 import EE2 from "eventemitter2";
 
-import { AnyRecord, StoreInitializer, NestoreOptions, Handlers, BaseNestoreOptions, StorageOptionsB, StorageOptionsA, EventEmitter2 } from "@pratiq/nestore-types";
+import { AnyRecord, StoreInitializer, NestoreOptions, Handlers, BaseNestoreOptions, StorageOptionsB, StorageOptionsA, NSTEventEmitter, Middleware } from "@pratiq/nestore-types";
 
 const sendToReduxDevTools = (action: any, state: any) => {
     try{
@@ -21,7 +21,47 @@ const isPlainObject = (value: any): value is object => {
     return Object.prototype.toString.call(value) === '[object Object]';
 }
 
+const createDeepProxy = (target: any, handlers: ProxyHandler<any>): any => {
+    return new Proxy(target, {
+        ...handlers,
+        get: (target, prop, receiver) => {
+            const value = Reflect.get(target, prop, receiver);
+            if (typeof value === 'object' && value !== null) {
+                return createDeepProxy(value, handlers); // Recursively create proxy for nested objects
+            }
+            return value;
+        },
+    });
+}
 
+
+const eventMethods = [
+    'emit',
+    'emitAsync',
+    'addListener',
+    'on',
+    'prependListener',
+    'once',
+    'prependOnceListener',
+    'many',
+    'prependMany',
+    'onAny',
+    'prependAny',
+    'offAny',
+    'removeListener',
+    'off',
+    'removeAllListeners',
+    'setMaxListeners',
+    'getMaxListeners',
+    'eventNames',
+    'listenerCount',
+    'listeners',
+    'listenersAny',
+    'waitFor',
+    'listenTo',
+    'stopListeningTo',
+    'hasListeners'
+];
 
 export type EventChange = {
     key: string;
@@ -35,11 +75,11 @@ export type EventChange = {
 function createStore<T extends AnyRecord>(
     initialState: StoreInitializer<T> | T = {} as T,
     options: NestoreOptions<T> = {}
-): T & EventEmitter2 {
+): T & NSTEventEmitter {
         
 
     let globalDebugNamespace:string = ''
-    const EE: EventEmitter2 = new EE2({
+    const EE: NSTEventEmitter = new EE2({
 
         // set this to `true` to use wildcards
         wildcard: true,
@@ -69,18 +109,16 @@ function createStore<T extends AnyRecord>(
     let state: T = {} as T
 
 
-    const listeners: Record<string, Function[]> = {};
-
-    const notifyListeners = (path: string, change: EventChange) => {
-        if (listeners[path]) {
-            listeners[path].forEach((listener) => listener(change));
-        }
+    const notifyListeners = (path: string | symbol, change: EventChange) => {
+        console.log('EMITTING:', {path, change})
+        EE.emit(path, change)
+  
     };
 
 
 
     
-    //&                                                                          
+    //& DEBUG SETTINGS                                                                                                  
     if(options?.debug){
         globalDebugNamespace = typeof options?.debug === 'string' ? options.debug : '*'
     }
@@ -103,7 +141,7 @@ function createStore<T extends AnyRecord>(
 
     
 
-  
+    //& PARSE INITIAL STATE AND OPTIONS                                                                                 
     if (typeof initialState === 'object') {
         if (!isPlainObject(initialState)) {
             throw new Error(`InitialState is of invalid type. Expected plain object or function, but received: ${typeof initialState}`);
@@ -117,6 +155,8 @@ function createStore<T extends AnyRecord>(
     }
 
 
+
+    //& UPDATE LOCAL STORAGE                                                                                            
     const updateStorage = (target:T | Partial<T>) => {
         if(storageObject){
             try{
@@ -128,54 +168,19 @@ function createStore<T extends AnyRecord>(
     }
 
 
-    const eventMethods = [
-        'emit',
-        'emitAsync',
-        'addListener',
-        'on',
-        'prependListener',
-        'once',
-        'prependOnceListener',
-        'many',
-        'prependMany',
-        'onAny',
-        'prependAny',
-        'offAny',
-        'removeListener',
-        'off',
-        'removeAllListeners',
-        'setMaxListeners',
-        'getMaxListeners',
-        'eventNames',
-        'listenerCount',
-        'listeners',
-        'listenersAny',
-        'waitFor',
-        'listenTo',
-        'stopListeningTo',
-        'hasListeners'
-      ];
 
-
+    //& GET                                                                                                             
     const proxy_get = (target: Partial<T>, prop: string | symbol, receiver: any) => {
         // Return the entire store if 'get' is invoked without arguments
         let actionId = tinyId(4)
         logger.action.log({ action: 'get', actionId, prop, target })
         let returnable:any
 
-
         if (prop === 'undefined') {
             logger.get.log(`Prop is 'undefined', returning store.`)
-
             returnable = target;
-            // return target;
             return;
         }
-
-        
-
-
-
 
 
         else if (typeof prop === 'string' && prop.includes('.')) {
@@ -185,80 +190,66 @@ function createStore<T extends AnyRecord>(
             for (let part of parts) {
                 current = current[part];
             }
-
              returnable = current;
-            // return current;
         }
 
         else if(typeof prop === 'string') {
             if(eventMethods.includes(prop)){
                 console.log('proxy getter attempted access to event methods:', prop)
-                let method = (EE as any)[prop]
+                let method: NSTEventEmitter[keyof NSTEventEmitter] = (EE as any)[prop].bind(EE)
                 console.log('Returning eventEmitter method:', method)
                 return method
             }
-            // return Reflect.get(target, prop, receiver) as T[typeof prop]
             returnable = Reflect.get(target, prop, receiver) // as T[typeof prop]
         }
 
         if(typeof returnable === 'function'){
             return function (...args:any[]) {
-                // console.log('>>>>> FUNC')
-                // console.log(`[${actionId}|I|${Date.now()}\n\t`, args)
                 let res = returnable.apply(receiver, args)
         
                 if (res instanceof Promise) {
                     // If the result is a promise, we need to handle it asynchronously
                     return res.then((asyncRes) => {
-                        // console.log(`[${actionId}|O|${Date.now()}\n\t`, asyncRes)
                         return asyncRes
                     });
                 } else {
-                    // console.log(`[${actionId}|O|${Date.now()}\n\t`, res)
                     return res
                 }
             }
         }
 
         return Reflect.get(target, prop, receiver)
-
-        // return Reflect.get(target, prop, receiver) as T[typeof prop]
     }
 
+    //& SET                                                                                                             
     const proxy_set = (target: Partial<T>, prop: string | symbol, value: any, receiver: any) => {
-        console.log('> ROOT | set:', {
-            target,
-            prop,
-            value,
-            receiver
-        })
-        let actionId = tinyId(4)
-        // console.log('> ROOT| set | Is target extensible:', Object.isExtensible(target));
-        // console.log('> ROOT | set | Property descriptor:', Object.getOwnPropertyDescriptor(target, prop));
-        // console.log('> ROOT | set prop:', prop)
-        // console.log('> ROOT | set value:', value)
-        const oldValue = Reflect.get(target, prop, receiver);
-        const result = Reflect.set(target, prop, value, receiver ?? target);
-        // console.log('> ROOT | set result:', result)
-        if (result) {
-            updateStorage(target)
-        }
-        
-        if (oldValue !== value) {
-            // EE.emit(prop.toString(), {
-            //     key: prop.toString(),
-            //     path: prop.toString(),
-            //     value: value,
-            // });
+        try{
+
+            let actionId = tinyId(4)
+            console.log('> ROOT| set | Is target extensible:', Object.isExtensible(target));
+            console.log('> ROOT | set | Property descriptor:', Object.getOwnPropertyDescriptor(target, prop));
+            console.log('> ROOT | set prop:', prop)
+            console.log('> ROOT | set value:', value)
+            const oldValue = Reflect.get(target, prop, receiver);
+            const result = Reflect.set(target, prop, value, receiver ?? target);
+            logger.action.log({ action: 'set', actionId, prop, value, oldValue, result, target })
+            console.log('> ROOT | set result:', result)
+            if (result) {
+                updateStorage(target)
+            }
+            
+            notifyListeners(prop, { key: prop.toString(), path: prop.toString(), previousValue: oldValue, value });
             sendToReduxDevTools({ type: 'SET', payload: { prop, value } }, target);
-            notifyListeners(prop.toString(), { key: prop.toString(), path: prop.toString(), previousValue: oldValue, value });
+            
+            
+            return result; 
+        }catch(err){
+            console.log('ERROR WITH PROXY SET HANDLER:', err)
+            return false
         }
-        
-        
-        logger.action.log({ action: 'set', actionId, prop, value, oldValue, result, target })
-        return result; 
     }
 
+    //& DELETE                                                                                                          
     const proxy_delete = (target: Partial<T>, prop: string | symbol) => {
         // Custom delete logic
         let actionId = tinyId(4)
@@ -269,22 +260,15 @@ function createStore<T extends AnyRecord>(
         if (result) {
             updateStorage(target)
             sendToReduxDevTools({ type: 'SET', payload: { prop, value:undefined } }, target);
-            notifyListeners(prop.toString(), { key: prop.toString(), path: prop.toString(), previousValue: oldValue, value:undefined });
+            notifyListeners(prop, { key: prop.toString(), path: prop.toString(), previousValue: oldValue, value:undefined });
         }
         return result
     }
 
 
 
-    let handlers: Handlers<T> = {
-        get: proxy_get,
-        set: proxy_set,
-        deleteProperty: proxy_delete
-    }
-
-    let proxy: T & EventEmitter2 = new Proxy(state, handlers) as T & EventEmitter2
-
-
+    
+    //& STORE INITIALIZER                                                                                               
     if (typeof initialState === 'function') {
         const func = initialState as StoreInitializer<T>;
         let newState = func(state as T);
@@ -293,25 +277,72 @@ function createStore<T extends AnyRecord>(
         let newState= JSON.parse(JSON.stringify(initialState as T));
         Object.assign(state, newState)
     }
+    
+    //& MIDDLEWARE REGISTRATION                                                                                         
+    let handlers: Handlers<T> = {}
+    type Context<T> = {
+        target: Partial<T>;
+        prop: string | symbol;
+        receiver?: any;
+        value?: any;
+    };
+    type Middleware<T> = (context: Context<T>, trapName: string, next: () => any) => any;
 
-    if(options.middleware){
-        for (const middleware of options.middleware) {
-            console.log('>>> Registering middleware:', middleware?.name ?? middleware)
-            handlers = middleware(proxy, () => handlers) as Handlers<T>;
+    if(options.middleware && options.middleware.length){
+
+        
+        // type Middleware<T> = (context: T, trapName: string, next: () => any) => any;
+
+        function compose<T>(middlewares: Middleware<T>[]): Middleware<T> {
+            return function (context: Context<T>, trapName: string, next: () => any) {
+            let index = -1;
+            
+            function dispatch(i: number): any {
+                if (i <= index) throw new Error('next() called multiple times');
+                index = i;
+                let fn = middlewares[i] || next;
+                if (!fn) return;
+                try {
+                    return fn(context, trapName, () => dispatch(i + 1));
+                } catch (err) {
+                    throw err;
+                }
+            }
+
+                return dispatch(0);
+            };
+        }
+
+        const composed = compose(options.middleware);
+   
+        handlers = {
+            get(target: Partial<T>, prop: string | symbol, receiver: any) {
+                return composed({ target, prop, receiver }, 'get', () => proxy_get(target, prop, receiver));
+            },
+            set(target: Partial<T>, prop: string | symbol, value: any, receiver: any) {
+                return composed({ target, prop, value, receiver }, 'set', () => proxy_set(target, prop, value, receiver));
+            },
+            deleteProperty(target: Partial<T>, prop: string | symbol) {
+                return composed({ target, prop }, 'deleteProperty', () => proxy_delete(target, prop));
+            }
+        }
+
+    }else{
+        handlers = {
+            get: proxy_get,
+            set: proxy_set,
+            deleteProperty: proxy_delete
         }
     }
-
-    proxy = new Proxy(state, handlers) as T & EventEmitter2
-
-
+   
+    let proxy: T & NSTEventEmitter = createDeepProxy(state, handlers) as T & NSTEventEmitter
 
 
 
 
 
-
-
-
+    // //& PROXY WITH STORE AND MIDDLEWARE                                                                             
+    // proxy = createDeepProxy(state, handlers) as T & NSTEventEmitter
 
     //& Setup DevTools                                                                                                  
     if(DT){

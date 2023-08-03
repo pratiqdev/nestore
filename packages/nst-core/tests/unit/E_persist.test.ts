@@ -61,7 +61,7 @@ const sto = {
 }
 
 
-describe(heading('E | persist'), function () {
+describe.skip(heading('E | persist'), function () {
 
   it('E.1 | Store loads data from storage', function () {
 

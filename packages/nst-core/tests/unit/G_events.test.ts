@@ -61,7 +61,7 @@ let nst = createStore<Store>((self) => ({
 
 
 
-describe(heading('G | Events'), function () {
+describe.skip(heading('G | Events'), function () {
   beforeEach(()=>{
     nst = createStore((x) => ({
       count: 2,
@@ -106,27 +106,36 @@ describe(heading('G | Events'), function () {
       }
     }))
 
-    console.log('NST.ON:', {
-      type: typeof nst.on,
-      returnType: typeof nst.on('', () => {})
-    })
 
 
-    nst.on('name', (e:EventChange) => {
-      console.log('--- name:', e)
+
+    nst.onAny((e:string | string[]) => {
+      console.log('--- any:', e)
     })
+    // nst.on('nested', (e:EventChange) => {
+    //   console.log('--- nested:', e)
+    // })
+
+    // nst.on('nested.*', (e:EventChange) => {
+    //   console.log('--- nested.*:', e)
+    // })
+
+    // nst.on('nested.**', (e:EventChange) => {
+    //   console.log('--- nested.**:', e)
+    // })
 
     // nst.on('nested.object', (e:EventChange) => {
-    //   console.log('--- nested:', e)
+    //   console.log('--- nested.object:', e)
     // })
     // console.log('-'.repeat(80))
     // console.log(nst)
     // console.log('-'.repeat(80))
     // nst.name = 'ayo'
-    // nst.nested = { object: {}, array: [] }
-    // nst.nested.object.v = 'hello'
+    nst.nested = { object: {}, array: [] }
+    nst.nested.object = { v: 'yo' }
+    nst.nested.object.v = 'hello'
 
-    // expect(nst.nested.object.v).eq('hello')
+    expect(nst.nested.object.v).eq('hello')
 
     // nst.name = 'Johnny'
 

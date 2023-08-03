@@ -58,15 +58,17 @@ describe(heading('D | middleware'), function () {
   let valueFromMiddleware: string = ''
 
   const customGetMiddleware = (self:any, next: () => any) => {
-    const og = next()
     return {
       get(target: any, prop: string | symbol, receiver: any) {
-        let mwValue = og.get?.(target, prop, receiver);
+        console.log('getting value in middleware:', prop)
+        let mwValue = next()?.get?.(target, prop, receiver) ?? Reflect.get(target, prop, receiver);
+        console.log('middleware set value:', mwValue)
         valueFromMiddleware = mwValue
         return mwValue
-      }
+      },
     }
   };
+
 
 
     type NST = {

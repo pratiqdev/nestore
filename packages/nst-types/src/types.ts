@@ -80,7 +80,8 @@ export type NestoreOptions<T> = BaseNestoreOptions<T> | (BaseNestoreOptions<T> &
 
 export type NextFunc<T> = () => Handlers<T>
 
-export type Middleware<T> = (self: T, next: NextFunc<T>) => Handlers<T>
+// export type Middleware<T> = (self: T, next: NextFunc<T>) => Handlers<T>
+export type Middleware<T> = (context: T, trapName: string, next: () => any) => any;
 
 export type Handlers<T> = {
     get?: (target: Partial<T>, prop: string | symbol, receiver: any) => any;
@@ -204,13 +205,13 @@ export interface OnOptions {
 }
 
 export interface Listener {
-    emitter: EventEmitter2;
+    emitter: NSTEventEmitter;
     event: event|eventNS;
     listener: ListenerFn;
     off(): this;
 }
 
-export declare class EventEmitter2 {
+export declare class NSTEventEmitter {
     constructor(options?: ConstructorOptions)
     emit(event: event | eventNS, ...values: any[]): boolean;
     emitAsync(event: event | eventNS, ...values: any[]): Promise<any[]>;
@@ -241,8 +242,8 @@ export declare class EventEmitter2 {
     listenTo(target: GeneralEventEmitter, events: Object, options?: ListenToOptions): this;
     stopListeningTo(target?: GeneralEventEmitter, event?: event | eventNS): Boolean;
     hasListeners(event?: String): Boolean
-    static once(emitter: EventEmitter2, event: event | eventNS, options?: OnceOptions): CancelablePromise<any[]>;
+    static once(emitter: NSTEventEmitter, event: event | eventNS, options?: OnceOptions): CancelablePromise<any[]>;
     static defaultMaxListeners: number;
 }
 
-export default EventEmitter2;
+export default NSTEventEmitter;
